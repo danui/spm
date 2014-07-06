@@ -8,3 +8,6 @@ Tasks
 
 [ ] Inhibit program if git status --porcelain has lines.  This is safer
     than stashing.  Remove stashing code.
+
+[ ] Ensure that the value of total is non-decreasing.  This is the way
+    we handle branching and merging of the git tree.

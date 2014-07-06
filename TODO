@@ -10,6 +10,9 @@ Tasks
 
 [ ] Support resuming from some commit hash.
 
+[ ] If the same file is specified more than once, SPM should still only
+    count that file once.
+
 
 ----------------------------------------------------------------------
 

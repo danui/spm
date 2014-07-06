@@ -14,6 +14,11 @@ public class SpmMain {
 
     public SpmMain(String[] args) throws Exception {
 
+        // Must specify at least one file.
+        if (args.length == 0) {
+            throw new Exception("No files specified.");
+        }
+
         // Change args into an array of files.
         File[] files = getFiles(args);
 

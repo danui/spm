@@ -49,14 +49,13 @@ public class SpmMain {
 
     public LinkedList<String> getCommits(String[] paths) throws Exception {
         Runtime rt = Runtime.getRuntime();
-        String[] cmd = new String[5 + paths.length];
+        String[] cmd = new String[4 + paths.length];
         cmd[0] = "git";
         cmd[1] = "log";
         cmd[2] = "--reverse";
-        cmd[3] = "--format";
-        cmd[4] = "format: %H";
+        cmd[3] = "--format=format: %H";
         for (int i = 0; i < paths.length; ++i) {
-            cmd[5+i] = paths[i];
+            cmd[4+i] = paths[i];
         }
         Process child = rt.exec(cmd);
         child.waitFor();

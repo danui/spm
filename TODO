@@ -2,12 +2,20 @@ Tasks
 
 [ ] Make processed branch selectable.  Currently it assumes master.
 
-[C] Return user to the commit and branch SPM was started with; not jump
-    user to master.  This is important because we are using `git stash
-    pop`!  Popping at the wrong commit is bad.
-
 [ ] Inhibit program if git status --porcelain has lines.  This is safer
     than stashing.  Remove stashing code.
 
-[ ] Ensure that the value of total is non-decreasing.  This is the way
+[ ] Output commit hash so that a user can specify a commit from which to
+    resume.
+
+[ ] Support resuming from some commit hash.
+
+
+----------------------------------------------------------------------
+
+[X] Ensure that the value of total is non-decreasing.  This is the way
     we handle branching and merging of the git tree.
+
+[C] Return user to the commit and branch SPM was started with; not jump
+    user to master.  This is important because we are using `git stash
+    pop`!  Popping at the wrong commit is bad.

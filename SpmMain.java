@@ -123,7 +123,6 @@ public class SpmMain {
 
     private void processCommits(LinkedList<Commit> commits, String[] paths) throws Exception {
         Commit firstCommit = null;
-        long lastTotal = 0;
         System.out.format("%12s %12s %8s %8s %8s %8s %8s%n",
             "secs",
             "days",
@@ -145,18 +144,15 @@ public class SpmMain {
                 epochSeconds = commit.epochSeconds - firstCommit.epochSeconds;
                 days = commit.getDays() - firstCommit.getDays();
             }
-            if (lastTotal <= counts.getTotal()) {
-                System.out.format("%12d %12.6f %8d %8d %8d %8d %8d%n",
-                    epochSeconds,
-                    days,
-                    counts.getTotal(),
-                    counts.openCount,
-                    counts.closeCount,
-                    counts.cancelCount,
-                    counts.deferCount
-                );
-                lastTotal = counts.getTotal();
-            }
+            System.out.format("%12d %12.6f %8d %8d %8d %8d %8d%n",
+                epochSeconds,
+                days,
+                counts.getTotal(),
+                counts.openCount,
+                counts.closeCount,
+                counts.cancelCount,
+                counts.deferCount
+            );
         }
     }
 

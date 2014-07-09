@@ -1,11 +1,15 @@
 Tasks
 
+
+----------------------------------------------------------------------
+
+
 [ ] Make processed branch selectable.  Currently it assumes master.
 
 [ ] Inhibit program if git status --porcelain has lines.  This is safer
     than stashing.  Remove stashing code.
 
-[ ] Output commit hash so that a user can specify a commit from which to
+[X] Output commit hash so that a user can specify a commit from which to
     resume.
 
 [ ] Support resuming from some commit hash.

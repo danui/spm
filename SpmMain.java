@@ -21,6 +21,9 @@ public class SpmMain {
         public double getDays() {
             return (double)epochSeconds / 60 / 60 / 24;
         }
+        public String getShortHash() {
+            return hash.substring(0,7);
+        }
     }
 
     private static class Counts {
@@ -123,8 +126,8 @@ public class SpmMain {
 
     private void processCommits(LinkedList<Commit> commits, String[] paths) throws Exception {
         Commit firstCommit = null;
-        System.out.format("%12s %12s %8s %8s %8s %8s %8s%n",
-            "secs",
+        System.out.format("%7s %12s %8s %8s %8s %8s %8s%n",
+            "#commit",
             "days",
             "total",
             "open",
@@ -136,16 +139,14 @@ public class SpmMain {
         while (iter.hasNext()) {
             Commit commit = iter.next();
             Counts counts = getCommitCounts(commit, paths);
-            long epochSeconds = 0;
             double days = 0.0;
             if (firstCommit == null) {
                 firstCommit = commit;
             } else {
-                epochSeconds = commit.epochSeconds - firstCommit.epochSeconds;
                 days = commit.getDays() - firstCommit.getDays();
             }
-            System.out.format("%12d %12.6f %8d %8d %8d %8d %8d%n",
-                epochSeconds,
+            System.out.format("%7s %12.6f %8d %8d %8d %8d %8d%n",
+                commit.getShortHash(),
                 days,
                 counts.getTotal(),
                 counts.openCount,

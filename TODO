@@ -3,6 +3,13 @@ Tasks
 
 ----------------------------------------------------------------------
 
+[ ] Update regular expression to ignore lines where non-whitespace
+    characters appear before the item brackets.  So code like the
+    following does not get counted as an item.  (Even though it is
+    atypical for 'X' to be used for such purposes.)
+
+        for (X=0; X < N; ++X)
+                A[X] = 0;
 
 [ ] Make processed branch selectable.  Currently it assumes master.
 

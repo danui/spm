@@ -3,6 +3,10 @@ Tasks
 
 ----------------------------------------------------------------------
 
+[ ] Use Eclipse JGit instead of `exec()` calls to `git`.  URL below.
+
+        http://eclipse.org/jgit/download/
+
 [ ] Update regular expression to ignore lines where non-whitespace
     characters appear before the item brackets.  So code like the
     following does not get counted as an item.  (Even though it is

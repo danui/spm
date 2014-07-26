@@ -15,5 +15,5 @@ install:
 clean:
 	find . -name "*~" -exec rm -vf \{\} \+
 	find . -name "*.class" -exec rm -vf \{\} \+
-	find . -name "*.jar" -exec rm -vf \{\} \+
+	rm -vf spm.jar
 	rm -rf out

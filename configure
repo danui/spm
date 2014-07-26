@@ -1,0 +1,16 @@
+#!/bin/bash
+
+INSTALL_DIR=$1
+
+if [[ -z $INSTALL_DIR ]]; then
+    echo "Usage: ./configure <install_dir>"
+    exit 1
+fi
+
+if [[ ! -d $INSTALL_DIR ]]; then
+    echo "Not a directory: $INSTALL_DIR"
+    exit 1
+fi
+
+echo "INSTALL_DIR=$INSTALL_DIR" > Makefile
+echo "include build.mk" >> Makefile

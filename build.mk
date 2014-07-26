@@ -10,7 +10,7 @@ spm.jar: out/com/spm/SpmMain.class
 	jar cvfm spm.jar manifest.txt -C out com
 
 install:
-	cp -vf spm.jar ~/bin/.
+	cp -vf spm.jar $(INSTALL_DIR)/.
 
 clean:
 	find . -name "*~" -exec rm -vf \{\} \+

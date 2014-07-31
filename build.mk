@@ -14,7 +14,8 @@ out/%.class: src/%.java
 	javac -sourcepath src -d out -cp out:dependencies/org.eclipse.jgit-3.4.1.201406201815-r.jar $^
 
 spm.jar: $(CLASS_FILES)
-	jar cvfm spm.jar manifest.txt -C out com
+	bash scripts/makejar.sh
+#	jar cvfm spm.jar manifest.txt -C out com
 
 install:
 	cp -vf spm.jar $(INSTALL_DIR)/.

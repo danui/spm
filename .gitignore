@@ -2,3 +2,4 @@
 *.class
 Makefile
 spm.jar
+out/

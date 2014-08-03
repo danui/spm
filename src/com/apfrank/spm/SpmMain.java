@@ -36,43 +36,60 @@ public class SpmMain {
                 System.exit(1);
             }
 
-            File repoDir = new File(args[0]);
-            if (!repoDir.isDirectory()) {
-                System.out.println("Not a directory: " + repoDir.getCanonicalPath());
+            Git git = createClonedWorkingRepository(args[0]);
+
+            File argDir = new File(args[0]);
+            if (!argDir.isDirectory()) {
+                System.out.println("Not a directory: " + argDir.getCanonicalPath());
                 System.exit(1);
             }
 
+            // Use Repository Builder to find out what the git directory
+            // is.
             FileRepositoryBuilder repoBuilder = new FileRepositoryBuilder();
-            repoBuilder.findGitDir(repoDir);
-            if (null == repoBuilder.getGitDir()) {
-                System.out.println("Not a Git Repository: " + repoDir.getCanonicalPath());
+            repoBuilder.findGitDir(argDir);
+            File gitDir = repoBuilder.getGitDir();
+            if (null == gitDir) {
+                System.out.println("Not a Git Repository: " + argDir.getCanonicalPath());
                 System.exit(1);
             }
+            File repoDir = gitDir.getParentFile();
 
-            Repository repo = repoBuilder.build();
+            // List of names from repoDir to argDir.  For example, if
+            // argDir is `project.git/apple-trees/one`, nameList would
+            // contain: ["apple-trees", "one"].
+            LinkedList<String> nameList = getNameList(repoDir, argDir);
+            if (nameList == null) {
+                throw new Exception(String.format(
+                        "nameList is null, repoDir %s argDir %s",
+                        repoDir, argDir));
+            }
 
+            // Clone repository into a temporary directory.
             tmpDir = FileTools.createTempDir();
             File workingDir = new File(tmpDir, "working");
-
             // TODO: branchName should be an option.
             String branchName = "master";
             ArrayList<String> branchesToClone = new ArrayList<String>();
             branchesToClone.add(branchName);
-
             CloneCommand cloneCommand = new CloneCommand();
             cloneCommand.setRemote("origin");
             cloneCommand.setBranch(branchName);
             cloneCommand.setBranchesToClone(branchesToClone);
-            cloneCommand.setURI(repo.getDirectory().getCanonicalPath());
+            cloneCommand.setURI(repoDir.getCanonicalPath());
             cloneCommand.setDirectory(workingDir);
 
+            Git git = createCloneRepository(args[0]);
             Git git = cloneCommand.call();
 
-            // TODO: projectPath should be an option.
-            String projectPath = "scrum";
+            LinkedList<String> hashes = getCommitHashes(git, branchName);
 
-            File projectDir = new File(workingDir, projectPath);
+            // Create branches for each commit that is the same name as
+            // the commit hash.
+            nameCommits(git);
 
+
+            File projectDir = getSubFile(workingDir, nameList);
             SpmData data = new SpmData();
 
             data.setStories(curateFile(
@@ -80,39 +97,92 @@ public class SpmMain {
                     git,
                     branchName));
                     
-            File storiesFile = new File(projectDir, "stories.todo");
-            File backlogFile = new File(projectDir, "backlog.todo");
-            File[] sprintFiles = projectDir.listFiles(new FilenameFilter() {
-                    public boolean accept(File dir, String name) {
-                        return name.startsWith("sprint") && name.endsWith(".todo");
-                    }
-                });
-            System.out.println(storiesFile);
-            System.out.println(backlogFile);
-            for (int i = 0; i < sprintFiles.length; ++i) {
-                System.out.println(sprintFiles[i].getCanonicalPath());
-            }
         } finally {
             if (tmpDir != null) {
+                //System.out.println("Left dir: " + tmpDir);
                 FileTools.deleteRecursively(tmpDir);
             }
         }
     }
 
+    public static Git createClonedWorkingRepository() {
+
+        origin.repoDir;
+        origin.projectDir;
+        origin.projectRelPath;
+        origin.storiesRelPath;
+        origin.backlogRelPath;
+        
+        
+    }
+
+    public static LinkedList<String> getNameList(File major, File minor) {
+        LinkedList<String> nameList = new LinkedList<String>();
+        File at = minor;
+        while (true) {
+            if (at == null) {
+                return null;
+            } else if (at.equals(major)) {
+                return nameList;
+            } else {
+                nameList.addFirst(at.getName());
+                at = at.getParentFile();
+            }
+        }
+    }
+
+    public static File getSubFile(File major, LinkedList<String> nameList) throws Exception {
+        File file = new File(major.getCanonicalPath());
+        Iterator<String> iter = nameList.iterator();
+        while (iter.hasNext()) {
+            String name = iter.next();
+            System.out.println(name);
+            file = new File(file, name);
+        }
+        return file;
+    }
+
     private static SpmFile curateFile(File file, Git git, String branch) throws Exception {
         CheckoutCommand checkout = git.checkout();
         checkout.setStartPoint(branch);
+        checkout.setName(branch);
         checkout.call();
 
+        SpmFile spmFile = new SpmFile(file.getName());
+
         if (!file.isFile()) {
-            throw new Exception("File not found: " + file.getCanonicalPath());
+            return spmFile;
         }
-        System.out.println("Found file: " + file.getCanonicalPath());
 
+        // addLines...
+        {
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                spmFile.addLine(line);
+            }
+            reader.close();
+        }
+
+        // addCounts...
         LogCommand log = git.log();
-        log.addPath(file.getCanonicalPath());
-
-        return null;
+        log.addPath("scrum/stories.todo");
+        log.add(git.getRepository().resolve(branch));
+        for (Iterator<RevCommit> iter = log.call().iterator(); iter.hasNext();) {
+            RevCommit commit = iter.next();
+            CheckoutCommand co = git.checkout();
+            co.setStartPoint(commit);
+            co.setName(commit.getName());
+            co.setCreateBranch(true);
+            co.call();
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            int count = 0;
+            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                count += 1;
+            }
+            System.out.println(commit + " has count: " + count);
+        }
+        System.out.println("done");
+        return spmFile;
     }
 
     // TODO: delete below...

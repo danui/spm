@@ -28,12 +28,13 @@ function extractAllJars {
     for i in $DEP_DIR/*.jar; do
 	extractJar $i
     done
+    rm -vrf $OUT_DIR/META-INF
 }
 
 function main {
     verifyAtTopLevel
     extractAllJars
-    (cd $OUT_DIR; jar cfm $TOP_DIR/spm.jar $TOP_DIR/manifest.txt com org)
+    (cd $OUT_DIR; jar cvfm $TOP_DIR/spm.jar $TOP_DIR/manifest.txt *)
 }
 
 main

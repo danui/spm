@@ -1,4 +1,4 @@
-package com.spm;
+package com.apfrank.spm;
 
 import java.io.File;
 import java.io.FileReader;

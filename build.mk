@@ -2,11 +2,14 @@ default: build
 
 build: spm.jar
 
+CLASS_FILES=					\
+	out/com/apfrank/spm/SpmMain.class	\
+
 out/%.class: src/%.java
 	mkdir -p $(dir $@)
 	javac -d out $^
 
-spm.jar: out/com/spm/SpmMain.class
+spm.jar: $(CLASS_FILES)
 	jar cvfm spm.jar manifest.txt -C out com
 
 install:

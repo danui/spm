@@ -4,17 +4,98 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.FilenameFilter;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.CloneCommand;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+
+import com.apfrank.util.FileTools;
+
 public class SpmMain {
 
     public static void main(String[] args) throws Exception {
-        new SpmMain(args);
+        File tmpDir = null;
+        try {
+
+            // Must specify a git repository.
+            if (args.length != 1) {
+                System.out.println("Must specify path to a Git Repository.");
+                System.exit(1);
+            }
+
+            File repoDir = new File(args[0]);
+            if (!repoDir.isDirectory()) {
+                System.out.println("Not a directory: " + repoDir.getCanonicalPath());
+                System.exit(1);
+            }
+
+            FileRepositoryBuilder repoBuilder = new FileRepositoryBuilder();
+            repoBuilder.findGitDir(repoDir);
+            if (null == repoBuilder.getGitDir()) {
+                System.out.println("Not a Git Repository: " + repoDir.getCanonicalPath());
+                System.exit(1);
+            }
+
+            Repository repo = repoBuilder.build();
+
+            tmpDir = FileTools.createTempDir();
+            File workingDir = new File(tmpDir, "working");
+
+            // TODO: branchName should be an option.
+            String branchName = "master";
+            ArrayList<String> branchesToClone = new ArrayList<String>();
+            branchesToClone.add(branchName);
+
+            CloneCommand cloneCommand = new CloneCommand();
+            cloneCommand.setRemote("origin");
+            cloneCommand.setBranch(branchName);
+            cloneCommand.setBranchesToClone(branchesToClone);
+            cloneCommand.setURI(repo.getDirectory().getCanonicalPath());
+            cloneCommand.setDirectory(workingDir);
+
+            Git git = cloneCommand.call();
+
+            // TODO: projectPath should be an option.
+            String projectPath = "scrum";
+
+            File projectDir = new File(workingDir, projectPath);
+
+            // TODO: Implement the curator.  etc.
+            //ProjectCurator curator = new ProjectCurator(projectDir, git);
+            //ProjectData data = curator(curate);
+
+            File storiesFile = new File(projectDir, "stories.todo");
+            File backlogFile = new File(projectDir, "backlog.todo");
+            File[] sprintFiles = projectDir.listFiles(new FilenameFilter() {
+                    public boolean accept(File dir, String name) {
+                        return name.startsWith("sprint") && name.endsWith(".todo");
+                    }
+                });
+            System.out.println(storiesFile);
+            System.out.println(backlogFile);
+            for (int i = 0; i < sprintFiles.length; ++i) {
+                System.out.println(sprintFiles[i].getCanonicalPath());
+            }
+        } finally {
+            if (tmpDir != null) {
+                FileTools.deleteRecursively(tmpDir);
+            }
+        }
     }
+
+    // TODO: delete below...
+
 
     private static class Commit {
         public String hash;
@@ -48,11 +129,6 @@ public class SpmMain {
 
 
     public SpmMain(String[] args) throws Exception {
-
-        // Must specify at least one file.
-        if (args.length == 0) {
-            throw new Exception("No files specified.");
-        }
 
         // Change args into an array of files.
         File[] files = getFiles(args);

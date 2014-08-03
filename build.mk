@@ -4,10 +4,11 @@ build: spm.jar
 
 CLASS_FILES=					\
 	out/com/apfrank/spm/SpmMain.class	\
+	out/com/apfrank/util/FileTools.class	\
 
 out/%.class: src/%.java
 	mkdir -p $(dir $@)
-	javac -d out $^
+	javac -sourcepath src -d out -cp out:dependencies/org.eclipse.jgit-3.4.1.201406201815-r.jar $^
 
 spm.jar: $(CLASS_FILES)
 	jar cvfm spm.jar manifest.txt -C out com

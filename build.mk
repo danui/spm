@@ -4,6 +4,9 @@ build: spm.jar
 
 CLASS_FILES=					\
 	out/com/apfrank/spm/SpmMain.class	\
+	out/com/apfrank/spm/SpmData.class	\
+	out/com/apfrank/spm/SpmFile.class	\
+	out/com/apfrank/spm/SpmCounts.class	\
 	out/com/apfrank/util/FileTools.class	\
 
 out/%.class: src/%.java

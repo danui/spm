@@ -14,6 +14,8 @@ import java.util.regex.Matcher;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.CloneCommand;
+import org.eclipse.jgit.api.CheckoutCommand;
+import org.eclipse.jgit.api.LogCommand;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
@@ -71,10 +73,13 @@ public class SpmMain {
 
             File projectDir = new File(workingDir, projectPath);
 
-            // TODO: Implement the curator.  etc.
-            //ProjectCurator curator = new ProjectCurator(projectDir, git);
-            //ProjectData data = curator(curate);
+            SpmData data = new SpmData();
 
+            data.setStories(curateFile(
+                    new File(projectDir, "stories.todo"),
+                    git,
+                    branchName));
+                    
             File storiesFile = new File(projectDir, "stories.todo");
             File backlogFile = new File(projectDir, "backlog.todo");
             File[] sprintFiles = projectDir.listFiles(new FilenameFilter() {
@@ -92,6 +97,22 @@ public class SpmMain {
                 FileTools.deleteRecursively(tmpDir);
             }
         }
+    }
+
+    private static SpmFile curateFile(File file, Git git, String branch) throws Exception {
+        CheckoutCommand checkout = git.checkout();
+        checkout.setStartPoint(branch);
+        checkout.call();
+
+        if (!file.isFile()) {
+            throw new Exception("File not found: " + file.getCanonicalPath());
+        }
+        System.out.println("Found file: " + file.getCanonicalPath());
+
+        LogCommand log = git.log();
+        log.addPath(file.getCanonicalPath());
+
+        return null;
     }
 
     // TODO: delete below...

@@ -36,8 +36,6 @@ public class SpmMain {
                 System.exit(1);
             }
 
-            Git git = createClonedWorkingRepository(args[0]);
-
             File argDir = new File(args[0]);
             if (!argDir.isDirectory()) {
                 System.out.println("Not a directory: " + argDir.getCanonicalPath());
@@ -79,15 +77,10 @@ public class SpmMain {
             cloneCommand.setURI(repoDir.getCanonicalPath());
             cloneCommand.setDirectory(workingDir);
 
-            Git git = createCloneRepository(args[0]);
             Git git = cloneCommand.call();
-
-            LinkedList<String> hashes = getCommitHashes(git, branchName);
 
             // Create branches for each commit that is the same name as
             // the commit hash.
-            nameCommits(git);
-
 
             File projectDir = getSubFile(workingDir, nameList);
             SpmData data = new SpmData();
@@ -105,16 +98,16 @@ public class SpmMain {
         }
     }
 
-    public static Git createClonedWorkingRepository() {
+//     public static Git createClonedWorkingRepository() {
 
-        origin.repoDir;
-        origin.projectDir;
-        origin.projectRelPath;
-        origin.storiesRelPath;
-        origin.backlogRelPath;
+//         origin.repoDir;
+//         origin.projectDir;
+//         origin.projectRelPath;
+//         origin.storiesRelPath;
+//         origin.backlogRelPath;
         
         
-    }
+//     }
 
     public static LinkedList<String> getNameList(File major, File minor) {
         LinkedList<String> nameList = new LinkedList<String>();

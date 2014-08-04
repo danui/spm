@@ -20,7 +20,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 import com.apfrank.util.FileTools;
 
@@ -42,16 +41,11 @@ public class SpmMain {
                 System.exit(1);
             }
 
-            // Use Repository Builder to find out what the git directory
-            // is.
-            FileRepositoryBuilder repoBuilder = new FileRepositoryBuilder();
-            repoBuilder.findGitDir(argDir);
-            File gitDir = repoBuilder.getGitDir();
-            if (null == gitDir) {
+            File repoDir = GitTools.getRepoDir(argDir);
+            if (repoDir == null) {
                 System.out.println("Not a Git Repository: " + argDir.getCanonicalPath());
                 System.exit(1);
             }
-            File repoDir = gitDir.getParentFile();
 
             // List of names from repoDir to argDir.  For example, if
             // argDir is `project.git/apple-trees/one`, nameList would

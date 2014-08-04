@@ -49,10 +49,16 @@ public class SpmMain {
 
             LinkedList<String> pathNames = FileTools.getPathNames(repoDir, argDir);
 
-
-            // Clone repository into a temporary directory.
             tmpDir = FileTools.createTempDir();
+
             File workingDir = new File(tmpDir, "working");
+
+            // TODO: Replace the code below with the following call to
+            // GitTools.
+            //
+            //     GitTools.cloneRepository(repoDir, workingDir,
+            //         "origin", "master");
+
             // TODO: branchName should be an option.
             String branchName = "master";
             ArrayList<String> branchesToClone = new ArrayList<String>();

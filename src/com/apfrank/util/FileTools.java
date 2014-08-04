@@ -2,6 +2,8 @@ package com.apfrank.util;
 
 import java.io.File;
 
+import java.util.LinkedList;
+
 public class FileTools {
 
     public static File createTempDir() throws Exception {
@@ -29,6 +31,19 @@ public class FileTools {
             file.delete();
         } else {
             // Do not know what to do!
+        }
+    }
+
+    public static LinkedList<String> getPathNames(File baseDir, File descendent) {
+        LinkedList<String> list = new LinkedList<String>();
+        File i = descendent;
+        while (true) {
+            if (i.equals(baseDir)) {
+                return list;
+            } else {
+                list.addFirst(i.getName());
+                i = i.getParentFile();
+            }
         }
     }
 

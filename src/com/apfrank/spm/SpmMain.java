@@ -47,15 +47,8 @@ public class SpmMain {
                 System.exit(1);
             }
 
-            // List of names from repoDir to argDir.  For example, if
-            // argDir is `project.git/apple-trees/one`, nameList would
-            // contain: ["apple-trees", "one"].
-            LinkedList<String> nameList = getNameList(repoDir, argDir);
-            if (nameList == null) {
-                throw new Exception(String.format(
-                        "nameList is null, repoDir %s argDir %s",
-                        repoDir, argDir));
-            }
+            LinkedList<String> pathNames = FileTools.getPathNames(repoDir, argDir);
+
 
             // Clone repository into a temporary directory.
             tmpDir = FileTools.createTempDir();
@@ -76,7 +69,7 @@ public class SpmMain {
             // Create branches for each commit that is the same name as
             // the commit hash.
 
-            File projectDir = getSubFile(workingDir, nameList);
+            File projectDir = getSubFile(workingDir, pathNames);
             SpmData data = new SpmData();
 
             data.setStories(curateFile(
@@ -102,21 +95,6 @@ public class SpmMain {
         
         
 //     }
-
-    public static LinkedList<String> getNameList(File major, File minor) {
-        LinkedList<String> nameList = new LinkedList<String>();
-        File at = minor;
-        while (true) {
-            if (at == null) {
-                return null;
-            } else if (at.equals(major)) {
-                return nameList;
-            } else {
-                nameList.addFirst(at.getName());
-                at = at.getParentFile();
-            }
-        }
-    }
 
     public static File getSubFile(File major, LinkedList<String> nameList) throws Exception {
         File file = new File(major.getCanonicalPath());

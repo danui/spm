@@ -3,12 +3,14 @@ default: build
 build: spm.jar
 
 CLASS_FILES=					\
-	out/com/apfrank/spm/SpmMain.class	\
-	out/com/apfrank/spm/SpmData.class	\
-	out/com/apfrank/spm/SpmFile.class	\
-	out/com/apfrank/spm/SpmCounts.class	\
+						\
+	out/com/apfrank/spm/Main.class		\
+	out/com/apfrank/spm/FileTools.class	\
 	out/com/apfrank/spm/GitTools.class	\
-	out/com/apfrank/util/FileTools.class	\
+						\
+	out/com/apfrank/spm/Path.class		\
+	out/com/apfrank/spm/Commit.class	\
+	out/com/apfrank/spm/CommitLog.class	\
 
 out/%.class: src/%.java
 	mkdir -p $(dir $@)

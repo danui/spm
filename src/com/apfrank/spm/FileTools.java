@@ -1,4 +1,4 @@
-package com.apfrank.util;
+package com.apfrank.spm;
 
 import java.io.File;
 
@@ -12,7 +12,7 @@ public class FileTools {
         for (int i = 0; i < 10000; ++i) {
             File tmpDir = new File(baseDir, baseName+i);
             if (tmpDir.mkdir()) {
-                return tmpDir;
+                return tmpDir.getCanonicalFile();
             }
         }
         throw new Exception("Could not make temporary directory.");

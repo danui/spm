@@ -3,3 +3,4 @@
 Makefile
 spm.jar
 out/
+.DS_Store

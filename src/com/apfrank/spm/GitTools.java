@@ -3,6 +3,7 @@ package com.apfrank.spm;
 import java.io.File;
 
 import java.util.Iterator;
+import java.util.ArrayList;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.CloneCommand;
@@ -63,4 +64,19 @@ public class GitTools {
         return co.call();
     }
 
+    /**
+     * Clone repository at srcDir to destDir.
+     */
+    public static Git cloneRepository(File srcDir, File destDir,
+                                      String branch) throws Exception {
+        ArrayList<String> branches = new ArrayList<String>();
+        branches.add(branch);
+        CloneCommand clone = new CloneCommand();
+        clone.setRemote("origin");
+        clone.setBranch(branch);
+        clone.setBranchesToClone(branches);
+        clone.setURI(srcDir.getPath());
+        clone.setDirectory(destDir);
+        return clone.call();
+    }
 }

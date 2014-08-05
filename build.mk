@@ -11,6 +11,7 @@ CLASS_FILES=					\
 	out/com/apfrank/spm/Path.class		\
 	out/com/apfrank/spm/Commit.class	\
 	out/com/apfrank/spm/CommitLog.class	\
+	out/com/apfrank/spm/DataPoint.class	\
 
 out/%.class: src/%.java
 	mkdir -p $(dir $@)

@@ -20,6 +20,11 @@ public class Main {
             Git git = GitTools.cloneRepository(srcRepoDir, repoDir,
                                                "master");
             File projectDir = projectPath.getFile(repoDir);
+
+            //TodoFile stories = getStoriesFile(projectDir);
+            //TodoFile backlog = getBacklogFile(projectDir);
+            //Collection<TodoFile> sprints = getSprintFiles(projectDir);
+
         } finally {
             if (tmpDir != null) {
                 FileTools.deleteRecursively(tmpDir);

@@ -4,33 +4,38 @@ public class DataPoint {
 
     private Commit commit;
     private Path path;
-    private int todoCount;
-    private int doneCount;
+    private int[] count;
+    private int totalCount;
 
     public DataPoint(Commit commit, Path path) {
         this.commit = commit;
         this.path = path;
-        this.todoCount = 0;
-        this.doneCount = 0;
+        
+        count = new int[Symbols.NUM_SYMBOLS];
+        for (int i = 0; i < Symbols.NUM_SYMBOLS; ++i) {
+            count[i] = 0;
+        }
+        totalCount = 0;
     }
 
-    public int getTodoCount() {
-        return todoCount;
+    public Commit getCommit() {
+        return commit;
+    }
+    
+    public Path getPath() {
+        return path;
     }
 
-    public int getDoneCount() {
-        return doneCount;
+    public int getCount(int symbolCode) {
+        return count[symbolCode];
     }
 
     public int getTotalCount() {
-        return todoCount + doneCount;
+        return totalCount;
     }
 
-    public void incTodoCount() {
-        todoCount += 1;
-    }
-
-    public void incDoneCount() {
-        doneCount += 1;
+    public void increment(int symbolCode) {
+        count[symbolCode] += 1;
+        totalCount += 1;
     }
 }

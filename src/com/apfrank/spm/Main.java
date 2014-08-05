@@ -19,12 +19,13 @@ public class Main {
             File repoDir = new File(tmpDir, "repo");
             Git git = GitTools.cloneRepository(srcRepoDir, repoDir,
                                                "master");
-            File projectDir = projectPath.getFile(repoDir);
 
-            //TodoFile stories = getStoriesFile(projectDir);
-            //TodoFile backlog = getBacklogFile(projectDir);
-            //Collection<TodoFile> sprints = getSprintFiles(projectDir);
-
+            // TODO: Implement Project
+            //Project project = new Project(repoDir, git, projectPath);
+            
+            // TODO: Implement Presenter
+            //Presenter presenter = new Presenter(project);
+            //presenter.present(System.out);
         } finally {
             if (tmpDir != null) {
                 FileTools.deleteRecursively(tmpDir);

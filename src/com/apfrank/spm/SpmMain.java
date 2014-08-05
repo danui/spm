@@ -82,7 +82,7 @@ public class SpmMain {
                     new File(projectDir, "stories.todo"),
                     git,
                     branchName));
-                    
+
         } finally {
             if (tmpDir != null) {
                 //System.out.println("Left dir: " + tmpDir);
@@ -98,8 +98,8 @@ public class SpmMain {
 //         origin.projectRelPath;
 //         origin.storiesRelPath;
 //         origin.backlogRelPath;
-        
-        
+
+
 //     }
 
     public static File getSubFile(File major, LinkedList<String> nameList) throws Exception {

@@ -8,7 +8,7 @@ import org.eclipse.jgit.api.Git;
  * Main program of spm.jar.
  */
 public class Main {
-    
+
     public static void main(String[] args) throws Exception {
         File tmpDir = null;
         try {
@@ -22,7 +22,7 @@ public class Main {
 
             // TODO: Implement Project
             //Project project = new Project(repoDir, git, projectPath);
-            
+
             // TODO: Implement Presenter
             //Presenter presenter = new Presenter(project);
             //presenter.present(System.out);
@@ -32,7 +32,7 @@ public class Main {
             }
         }
     }
-    
+
     private static File getProjectDir(String[] args) throws Exception {
         if (args.length != 1) {
             throw new Exception("Usage: java -jar spm.jar <project dir>");
@@ -43,7 +43,7 @@ public class Main {
         }
         return dir.getCanonicalFile();
     }
-    
+
     private static File getRepoDir(File projectDir) throws Exception {
         File repoDir = GitTools.getRepoDir(projectDir);
         if (repoDir == null) {
@@ -52,5 +52,5 @@ public class Main {
         }
         return repoDir.getCanonicalFile();
     }
-    
+
 }

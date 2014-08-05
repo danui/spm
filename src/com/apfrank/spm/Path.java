@@ -5,9 +5,9 @@ import java.util.LinkedList;
 import java.util.Iterator;
 
 public class Path implements Comparable<Path> {
-    
+
     private LinkedList<String> nameList;
-    
+
     /**
      * Create a Path from an iterable of names.
      */
@@ -19,7 +19,7 @@ public class Path implements Comparable<Path> {
         }
         return path;
     }
-    
+
     public static Path createFrom(File base, File target) {
         Path path = new Path();
         File file = target;
@@ -34,7 +34,7 @@ public class Path implements Comparable<Path> {
             }
         }
     }
-    
+
     /**
      * Create empty path.
      */
@@ -45,18 +45,18 @@ public class Path implements Comparable<Path> {
     public void addFirst(String name) {
         nameList.addFirst(name);
     }
-    
+
     public void addLast(String name) {
         nameList.addLast(name);
     }
-    
+
     public int compareTo(Path other) {
         File dotFile = new File(".");
         File a = this.getFile(dotFile);
         File b = other.getFile(dotFile);
         return a.compareTo(b);
     }
-    
+
     public File getFile(File fromDir) {
         File file = fromDir;
         Iterator<String> iter = nameList.iterator();
@@ -68,12 +68,12 @@ public class Path implements Comparable<Path> {
         }
         return file;
     }
-    
+
     /**
      * Initialise empty path.
      */
     private void init() {
         nameList = new LinkedList<String>();
     }
-    
+
 }

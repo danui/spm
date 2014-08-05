@@ -10,7 +10,7 @@ public class DataPoint {
     public DataPoint(Commit commit, Path path) {
         this.commit = commit;
         this.path = path;
-        
+
         count = new int[Symbols.NUM_SYMBOLS];
         for (int i = 0; i < Symbols.NUM_SYMBOLS; ++i) {
             count[i] = 0;
@@ -21,7 +21,7 @@ public class DataPoint {
     public Commit getCommit() {
         return commit;
     }
-    
+
     public Path getPath() {
         return path;
     }

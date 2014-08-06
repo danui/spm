@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.Date;
 import java.util.Map;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * An object for storing Commits.
@@ -47,4 +49,19 @@ public class CommitLog {
         return entry.getValue();
     }
 
+    public Date getFirstDate() {
+        return commitsByDate.firstKey();
+    }
+
+    public Date getLastDate() {
+        return commitsByDate.lastKey();
+    }
+
+    public Collection<Commit> getCommits() {
+        return commitsByDate.values();
+    }
+
+    public Iterator<Commit> getIterator() {
+        return commitsByDate.values().iterator();
+    }
 }

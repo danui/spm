@@ -39,7 +39,20 @@ public class Path implements Comparable<Path> {
      * Create empty path.
      */
     public Path() {
-        nameList = new LinkedList<String>();
+        init();
+    }
+
+    public Path(Path other, String name) {
+        init();
+        Iterator<String> iter = other.getNameIterator();
+        while (iter.hasNext()) {
+            this.addLast(iter.next());
+        }
+        this.addLast(name);
+    }
+
+    public Iterator<String> getNameIterator() {
+        return nameList.iterator();
     }
 
     public void addFirst(String name) {
@@ -67,6 +80,18 @@ public class Path implements Comparable<Path> {
             file = new File(fromDir.getPath());
         }
         return file;
+    }
+
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        Iterator<String> iter = nameList.iterator();
+        while (iter.hasNext()) {
+            if (sb.length() > 0) {
+                sb.append(File.separatorChar);
+            }
+            sb.append(iter.next());
+        }
+        return sb.toString();
     }
 
     /**

@@ -12,15 +12,11 @@ public class Main {
         File tmpDir = null;
         try {
             File srcProjectDir = getProjectDir(args);
-            File srcRepoDir = getRepoDir(srcProjectDir);
-            Path projectPath = Path.createFrom(srcRepoDir, srcProjectDir);
-            tmpDir = FileTools.createTempDir();
-            File repoDir = new File(tmpDir, "repo");
-            Git git = GitTools.cloneRepository(srcRepoDir, repoDir,
-                                               "master");
 
-            // TODO: Implement Project
-            //Project project = new Project(repoDir, git, projectPath);
+            File argDir = getProjectDir(args);
+            tmpDir = FileTools.createTempDir();
+            File wrkDir = new File(tmpDir, "work");
+            Project project = new Project(argDir, wrkDir, "master");
 
             // TODO: Implement Presenter
             //Presenter presenter = new Presenter(project);
@@ -44,14 +40,4 @@ public class Main {
         }
         return dir.getCanonicalFile();
     }
-
-    private static File getRepoDir(File projectDir) throws Exception {
-        File repoDir = GitTools.getRepoDir(projectDir);
-        if (repoDir == null) {
-            throw new UsageException("Not in a Git repository: "
-                                + projectDir.getPath());
-        }
-        return repoDir.getCanonicalFile();
-    }
-
 }

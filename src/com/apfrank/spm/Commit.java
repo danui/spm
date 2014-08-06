@@ -31,7 +31,7 @@ public class Commit {
     public DataPoint getDataPoint(Path path) {
         return dataMap.get(path);
     }
-    
+
     /**
      * @return Iterator over data points associated with this commit.
      */

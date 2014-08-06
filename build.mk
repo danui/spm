@@ -3,6 +3,7 @@ default: build
 CLASS_FILES=					\
 						\
 	out/com/apfrank/spm/Main.class		\
+	out/com/apfrank/spm/Project.class	\
 	out/com/apfrank/spm/FileTools.class	\
 	out/com/apfrank/spm/GitTools.class	\
 	out/com/apfrank/spm/UsageException.class	\

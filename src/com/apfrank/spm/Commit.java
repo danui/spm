@@ -1,23 +1,19 @@
 package com.apfrank.spm;
 
 import java.util.Date;
-import java.util.TreeSet;
+import java.util.TreeMap;
 import java.util.Iterator;
 
 public class Commit {
 
     private String hash;
     private Date date;
-
-    /**
-     * Set of paths associated with this Commit.
-     */
-    private TreeSet<Path> pathSet;
+    private TreeMap<Path,DataPoint> dataMap;
 
     public Commit(String hash, Date date) {
         this.hash = hash;
         this.date = date;
-        this.pathSet = new TreeSet<Path>();
+        this.dataMap = new TreeMap<Path,DataPoint>();
     }
 
     public String getHash() {
@@ -28,19 +24,18 @@ public class Commit {
         return date;
     }
 
-    /**
-     * Add a Path to a Commit if it is not already associated with
-     * the commit.
-     */
-    public void addPath(Path path) {
-        pathSet.add(path);
+    public void addDataPoint(DataPoint dataPoint) {
+        dataMap.put(dataPoint.getPath(), dataPoint);
     }
 
-    /**
-     * @return Iterator over the set of paths associated with this commit.
-     */
-    public Iterator<Path> getPathIterator() {
-        return pathSet.iterator();
+    public DataPoint getDataPoint(Path path) {
+        return dataMap.get(path);
     }
-
+    
+    /**
+     * @return Iterator over data points associated with this commit.
+     */
+    public Iterator<DataPoint> getIterator() {
+        return dataMap.values().iterator();
+    }
 }

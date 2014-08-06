@@ -3,7 +3,6 @@ package com.apfrank.spm;
 import java.io.File;
 import org.eclipse.jgit.api.Git;
 
-
 /**
  * Main program of spm.jar.
  */
@@ -26,6 +25,8 @@ public class Main {
             // TODO: Implement Presenter
             //Presenter presenter = new Presenter(project);
             //presenter.present(System.out);
+        } catch (UsageException e) {
+            System.out.println(e.getMessage());
         } finally {
             if (tmpDir != null) {
                 FileTools.deleteRecursively(tmpDir);
@@ -35,11 +36,11 @@ public class Main {
 
     private static File getProjectDir(String[] args) throws Exception {
         if (args.length != 1) {
-            throw new Exception("Usage: java -jar spm.jar <project dir>");
+            throw new UsageException("Usage: java -jar spm.jar <project dir>");
         }
         File dir = new File(args[0]);
         if (!dir.isDirectory()) {
-            throw new Exception("Not a directory: " + args[0]);
+            throw new UsageException("Not a directory: " + args[0]);
         }
         return dir.getCanonicalFile();
     }
@@ -47,7 +48,7 @@ public class Main {
     private static File getRepoDir(File projectDir) throws Exception {
         File repoDir = GitTools.getRepoDir(projectDir);
         if (repoDir == null) {
-            throw new Exception("Not in a Git repository: "
+            throw new UsageException("Not in a Git repository: "
                                 + projectDir.getPath());
         }
         return repoDir.getCanonicalFile();

@@ -7,6 +7,7 @@ CLASS_FILES=					\
 	out/com/apfrank/spm/Main.class		\
 	out/com/apfrank/spm/FileTools.class	\
 	out/com/apfrank/spm/GitTools.class	\
+	out/com/apfrank/spm/UsageException.class	\
 						\
 	out/com/apfrank/spm/Path.class		\
 	out/com/apfrank/spm/Commit.class	\

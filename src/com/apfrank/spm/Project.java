@@ -32,13 +32,17 @@ public class Project {
 
         todoPaths = new TreeSet<Path>();
 
-        scanForPaths();
+        findTodoPaths();
+        if (todoPaths.isEmpty()) {
+            throw new UsageException("No .todo files found at "
+                                     + srcDir.getPath());
+        }
         // TODO: buildCommitLog();
         // TODO: attachDataPoints();
         // TODO: counting();
     }
 
-    private void scanForPaths() {
+    private void findTodoPaths() {
         File[] files = projectDir.listFiles(new FilenameFilter() {
             public boolean accept(File dir, String name) {
                 if (name.equals("stories.todo")) {

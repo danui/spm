@@ -26,7 +26,7 @@ public class CommitLog {
     /**
      * Add Commit to database.
      */
-    public void add(Commit commit) {
+    public void addCommit(Commit commit) {
         commitsByHash.put(commit.getHash(), commit);
         commitsByDate.put(commit.getDate(), commit);
     }
@@ -36,7 +36,7 @@ public class CommitLog {
      *
      * @return Commit, or null if there is none matching 'hash'.
      */
-    public Commit get(String hash) {
+    public Commit getCommit(String hash) {
         return commitsByHash.get(hash);
     }
     
@@ -44,12 +44,12 @@ public class CommitLog {
      * Lookup Commit from RevCommit, creating a new Commit
      * if necessary.
      */
-    public Commit lookup(RevCommit revCommit) {
-        String hash = GitTools.readCommitHash(revCommit);
-        Commit commit = get(hash);
+    public Commit lookupCommit(RevCommit revCommit) {
+        String hash = revCommit.getName();
+        Commit commit = getCommit(hash);
         if (commit == null) {
-            Date date = GitTools.readCommitDate(revCommit);
-            commit = new Commit(hash, date);
+            commit = new Commit(revCommit);
+            addCommit(commit);
         }
         return commit;
     }
@@ -59,18 +59,18 @@ public class CommitLog {
      *
      * @return Commit, or null if there is no commit before 'date'.
      */
-    public Commit getBefore(Date date) {
+    public Commit getCommitBefore(Date date) {
         Map.Entry<Date,Commit> entry = commitsByDate.lowerEntry(date);
         if (entry == null)
             return null;
         return entry.getValue();
     }
 
-    public Date getFirstDate() {
+    public Date getCommitFirstDate() {
         return commitsByDate.firstKey();
     }
 
-    public Date getLastDate() {
+    public Date getCommitLastDate() {
         return commitsByDate.lastKey();
     }
 
@@ -78,7 +78,7 @@ public class CommitLog {
         return commitsByDate.values();
     }
 
-    public Iterator<Commit> getIterator() {
+    public Iterator<Commit> getCommitIterator() {
         return commitsByDate.values().iterator();
     }
 }

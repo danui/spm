@@ -4,16 +4,26 @@ import java.util.Date;
 import java.util.TreeMap;
 import java.util.Iterator;
 
-public class Commit {
+import org.eclipse.jgit.revwalk.RevCommit;
 
+/**
+ * A small wrapper around RevCommit that associates it with DataPoints.
+ */
+public class Commit {
+    private RevCommit revCommit;
     private String hash;
     private Date date;
     private TreeMap<Path,DataPoint> dataMap;
 
-    public Commit(String hash, Date date) {
-        this.hash = hash;
-        this.date = date;
+    public Commit(RevCommit revCommit) {
+        this.revCommit = revCommit;
+        this.hash = revCommit.getName();
+        this.date = revCommit.getAuthorIdent().getWhen();
         this.dataMap = new TreeMap<Path,DataPoint>();
+    }
+
+    public RevCommit getRevCommit() {
+        return revCommit;
     }
     
     public String getHash() {
@@ -35,7 +45,7 @@ public class Commit {
     /**
      * @return Iterator over data points associated with this commit.
      */
-    public Iterator<DataPoint> getIterator() {
+    public Iterator<DataPoint> getDataPointIterator() {
         return dataMap.values().iterator();
     }
 }

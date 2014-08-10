@@ -47,6 +47,7 @@ public class Project {
         projectName = projectPath.toString();
         buildTodoFileMap(filenameFilter);
         buildCommitLog();
+        performCounting();
     }
     
     public File getRepositoryDir() {
@@ -121,7 +122,7 @@ public class Project {
         Iterator<RevCommit> iter = log.call().iterator();
         while (iter.hasNext()) {
             RevCommit revCommit = iter.next();
-            Commit commit = commitLog.lookup(revCommit);
+            Commit commit = commitLog.lookupCommit(revCommit);
             DataPoint dataPoint = new DataPoint(
                 commit.getDate(),
                 todoFile.getPath()
@@ -129,5 +130,27 @@ public class Project {
             commit.addDataPoint(dataPoint);
             todoFile.addDataPoint(dataPoint);
         }
+    }
+    
+    private void performCounting() {
+        Iterator<Commit> iter = commitLog.getCommitIterator();
+        while (iter.hasNext()) {
+            Commit commit = iter.next();
+            performCountingOnCommit(commit);
+        }
+    }
+    
+    private void performCountingOnCommit(Commit commit) {
+        // TODO: git checkout commit.getHash();
+        
+        Iterator<DataPoint> iter = commit.getDataPointIterator();
+        while (iter.hasNext()) {
+            DataPoint dataPoint = iter.next();
+            performCountingOnDataPoint(dataPoint);
+        }
+    }
+    
+    private void performCountingOnDataPoint(DataPoint dataPoint) {
+        // TODO...
     }
 }

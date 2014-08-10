@@ -84,6 +84,13 @@ public class Project {
     }
     
     /**
+     * Get time of the first commit.
+     */
+    public long getBaseTime() {
+        return commitLog.getFirstDate().getTime();
+    }
+    
+    /**
      * Get an Iterator over the filenames accepted by the provided
      * FilenameFilter.
      */

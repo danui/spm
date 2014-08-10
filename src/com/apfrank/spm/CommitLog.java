@@ -66,11 +66,11 @@ public class CommitLog {
         return entry.getValue();
     }
 
-    public Date getCommitFirstDate() {
+    public Date getFirstDate() {
         return commitsByDate.firstKey();
     }
 
-    public Date getCommitLastDate() {
+    public Date getLastDate() {
         return commitsByDate.lastKey();
     }
 

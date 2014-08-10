@@ -1,8 +1,10 @@
 package com.apfrank.spm;
 
 import java.io.File;
-
+import java.io.FilenameFilter;
 import java.util.LinkedList;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class FileTools {
 
@@ -47,4 +49,15 @@ public class FileTools {
         }
     }
 
+    public static SortedSet<String> findFilenames(
+        File dir, FilenameFilter filter)
+    {
+        TreeSet<String> tree = new TreeSet<String>();
+        File[] files = dir.listFiles(filter);
+        for (int i = 0; i < files.length; ++i) {
+            tree.add(files[i].getName());
+        }
+        return tree;
+    }
+    
 }

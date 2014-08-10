@@ -2,68 +2,67 @@ package com.apfrank.spm;
 
 import org.eclipse.jgit.api.Git;
 
-import java.util.TreeSet;
-
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.Iterator;
+import java.util.SortedSet;
+import java.util.Map;
+import java.util.TreeMap;
 
+/**
+ * A Project object provides an interface to access information about
+ * an SPM Git Directory. This does not know about stories, backlog, etc.
+ * We defer that to higher level logic.
+ */
 public class Project {
 
     private Git git;
-    private File workingDir;
+    private String branch;
     private Path projectPath;
+    
+    private File repositoryDir;
     private File projectDir;
 
-    private TreeSet<Path> todoPaths;
+    /**
+     * Map filename -> TodoFile
+     */
+    private Map<String,TodoFile> todoFileMap;
 
-    public Project(File srcDir, File wrkDir, String branch)
-        throws Exception {
-
-        File srcRepoDir = GitTools.getRepoDir(srcDir);
-        if (srcRepoDir == null) {
-            throw new UsageException("Not in a Git repository: "
-                                    + srcDir.getPath());
-        }
-
-        workingDir = wrkDir;
-        projectPath = Path.createFrom(srcRepoDir, srcDir);
-        git = GitTools.cloneRepository(srcRepoDir, wrkDir, branch);
-        projectDir = projectPath.getFile(workingDir);
-
-        todoPaths = new TreeSet<Path>();
-
-        findTodoPaths();
-        if (todoPaths.isEmpty()) {
-            throw new UsageException("No .todo files found at "
-                                     + srcDir.getPath());
-        }
-        // TODO: buildCommitLog();
-        // TODO: attachDataPoints();
-        // TODO: counting();
+    public Project(Git git, String branch, Path path,
+                   FilenameFilter filenameFilter)
+    {
+        this.git = git;
+        this.branch = branch;
+        this.projectPath = path;
+        repositoryDir = GitTools.getRepositoryDir(git);
+        projectDir = projectPath.getFile(repositoryDir);
+        initTodoFileMap(filenameFilter);
+    }
+    
+    /**
+     * Get an Iterator over the filenames accepted by the provided
+     * FilenameFilter.
+     */
+    public Iterator<String> getFilenameIterator() {
+        return todoFileMap.keySet().iterator();
     }
 
-    private void findTodoPaths() {
-        File[] files = projectDir.listFiles(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                if (name.equals("stories.todo")) {
-                    return true;
-                } else if (name.equals("backlog.todo")) {
-                    return true;
-                } else if (name.startsWith("sprint-") &&
-                           name.endsWith(".todo")) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        });
-        for (int i = 0; i < files.length; ++i) {
-            File f = files[i];
-            if (f.isFile()) {
-                Path p = new Path(projectPath, f.getName());
-                todoPaths.add(p);
-                System.out.println(p);
-            }
+    public Iterator<TodoFile> getTodoFileIterator() {
+        return todoFileMap.values().iterator();
+    }
+
+    private void initTodoFileMap(FilenameFilter filenameFilter) {
+        assert projectDir != null;
+        assert todoFileMap == null;
+        todoFileMap = new TreeMap<String,TodoFile>();
+        SortedSet<String> set = FileTools.findFilenames(
+            projectDir, filenameFilter);
+        Iterator<String> iter = set.iterator();
+        while (iter.hasNext()) {
+            String filename = iter.next();
+            TodoFile todoFile = new TodoFile(filename);
+            todoFileMap.put(filename, todoFile);
         }
     }
+
 }

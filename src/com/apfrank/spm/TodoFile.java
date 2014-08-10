@@ -4,10 +4,10 @@ import java.io.File;
 
 public class TodoFile {
 
-    private File file;
-
-    public TodoFile(File file) {
-        this.file = file;
+    private String name;
+    
+    public TodoFile(String name) {
+        this.name = name;
     }
 
 }

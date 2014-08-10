@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /**
- * An object for storing Commits.
+ * An object for storing Commits ordered by time and by hash.
  */
 public class CommitLog {
 

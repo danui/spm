@@ -20,7 +20,18 @@ public class Path implements Comparable<Path> {
         return path;
     }
 
+    /**
+     * Create a path from a 'base' to a 'target'.
+     *
+     * @return Path with names from 'base' to 'target'.
+     *         Returns null if 'base' is not an ancestor of 'target'.
+     */
     public static Path createFrom(File base, File target) {
+
+        // Implementation Note: This is not a constructor because we
+        // want the ability to return 'null'. Consider using an
+        // exception?
+        
         Path path = new Path();
         File file = target;
         while (true) {
@@ -41,7 +52,7 @@ public class Path implements Comparable<Path> {
     public Path() {
         init();
     }
-
+    
     public Path(Path other, String name) {
         init();
         Iterator<String> iter = other.getNameIterator();

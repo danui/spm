@@ -22,10 +22,22 @@ public class GitTools {
      * @return Repository Directory, null if dir is not in a Git
      * Repository.
      */
-    public static File getRepoDir(File dir) {
+    public static File getRepositoryDir(File dir) {
         FileRepositoryBuilder b = new FileRepositoryBuilder();
         b.findGitDir(dir);
         File dotGit = b.getGitDir();
+        if (dotGit == null) {
+            return null;
+        } else {
+            return dotGit.getParentFile();
+        }
+    }
+    
+    /**
+     * Get the top-level directory of a 'git' repository.
+     */
+    public static File getRepositoryDir(Git git) {
+        File dotGit = git.getRepository().getDirectory();
         if (dotGit == null) {
             return null;
         } else {

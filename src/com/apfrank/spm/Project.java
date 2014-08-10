@@ -19,6 +19,7 @@ public class Project {
     private Git git;
     private String branch;
     private Path projectPath;
+    private String projectName;
     
     private File repositoryDir;
     private File projectDir;
@@ -36,7 +37,20 @@ public class Project {
         this.projectPath = path;
         repositoryDir = GitTools.getRepositoryDir(git);
         projectDir = projectPath.getFile(repositoryDir);
+        projectName = projectPath.toString();
         initTodoFileMap(filenameFilter);
+    }
+    
+    public String getName() {
+        return projectName;
+    }
+    
+    public void setName(String name) {
+        projectName = name;
+    }
+    
+    public int getFileCount() {
+        return todoFileMap.size();
     }
     
     /**

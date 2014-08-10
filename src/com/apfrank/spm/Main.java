@@ -14,6 +14,8 @@ public class Main {
             File projectDir = getProjectDir(args);
             File repositoryDir = getRepositoryDir(projectDir);
             Path projectPath = Path.createFrom(repositoryDir, projectDir);
+            Path namePath = Path.createFrom(repositoryDir.getParentFile(),
+                                            projectDir);
 
             // Declaration of tmpDir resides outside of 'try' construct
             // because we want to delete it in 'finally'.
@@ -27,6 +29,11 @@ public class Main {
             Project project = new Project(
                 git, branch, projectPath,
                 new ScrumFilenameFilter());
+            project.setName(namePath.toString());
+            
+            // DEVEL:
+            Presenter presenter = new BasicPresenter(project);
+            presenter.present();
             
             
             // TODO: Implement Presenter

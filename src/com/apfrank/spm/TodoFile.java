@@ -10,4 +10,7 @@ public class TodoFile {
         this.name = name;
     }
 
+    public String getName() {
+        return name;
+    }
 }

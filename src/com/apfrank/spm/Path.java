@@ -67,6 +67,10 @@ public class Path implements Comparable<Path> {
         }
     }
 
+    public String getLastName() {
+        return nameList.getLast();
+    }
+    
     public Iterator<String> getNameIterator() {
         return nameList.iterator();
     }

@@ -31,9 +31,15 @@ function extractAllJars {
     rm -vrf $OUT_DIR/META-INF
 }
 
+function copyHtml5 {
+    find html5 -name "*~" -exec rm -vf \{\} \+
+    cp -r html5 out/.
+}
+
 function main {
     verifyAtTopLevel
     extractAllJars
+    copyHtml5
     (cd $OUT_DIR; jar cvfm $TOP_DIR/spm.jar $TOP_DIR/manifest.txt *)
 }
 

@@ -24,11 +24,11 @@ public class TodoFile implements Comparable<TodoFile> {
     
     @Override
     public String toString() {
-        return getName();
+        return path.toString();
     }
     
     public String getName() {
-        return path.toString();
+        return path.getLastName();
     }
     
     public Path getPath() {

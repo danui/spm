@@ -3,6 +3,7 @@ default: build
 CLASS_FILES=						\
 	out/com/apfrank/spm/Main.class			\
 	out/com/apfrank/spm/BasicPresenter.class	\
+	out/com/apfrank/spm/Html5Presenter.class	\
 	out/com/apfrank/spm/Commit.class		\
 	out/com/apfrank/spm/CommitLog.class		\
 	out/com/apfrank/spm/DataPoint.class		\

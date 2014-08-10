@@ -9,8 +9,8 @@ import java.io.FileReader;
 
 public class BasicPresenter implements Presenter {
 
-    Project project;
-    PrintStream out;
+    private Project project;
+    private PrintStream out;
     
     public BasicPresenter(Project project) {
         this.project = project;

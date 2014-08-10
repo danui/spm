@@ -1,14 +1,20 @@
 package com.apfrank.spm;
 
+import java.util.Date;
+
+/**
+ * A DataPoint exists in at the intersection of time and space.
+ * Time in this case is specified by 'date' and space by 'path'.
+ */
 public class DataPoint {
 
-    private Commit commit;
+    private Date date;
     private Path path;
     private int[] count;
     private int totalCount;
 
-    public DataPoint(Commit commit, Path path) {
-        this.commit = commit;
+    public DataPoint(Date date, Path path) {
+        this.date = date;
         this.path = path;
 
         count = new int[Symbols.NUM_SYMBOLS];
@@ -18,10 +24,10 @@ public class DataPoint {
         totalCount = 0;
     }
 
-    public Commit getCommit() {
-        return commit;
+    public Date getDate() {
+        return date;
     }
-
+    
     public Path getPath() {
         return path;
     }

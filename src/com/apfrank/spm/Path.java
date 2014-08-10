@@ -27,22 +27,11 @@ public class Path implements Comparable<Path> {
      *         Returns null if 'base' is not an ancestor of 'target'.
      */
     public static Path createFrom(File base, File target) {
-
-        // Implementation Note: This is not a constructor because we
-        // want the ability to return 'null'. Consider using an
-        // exception?
-        
-        Path path = new Path();
-        File file = target;
-        while (true) {
-            if (file == null) {
-                return null;
-            } else if (file.equals(base)) {
-                return path;
-            } else {
-                path.addFirst(file.getName());
-                file = file.getParentFile();
-            }
+        try {
+            Path p = new Path(base, target);
+            return p;
+        } catch (RuntimeException e) {
+            return null;
         }
     }
 
@@ -61,6 +50,22 @@ public class Path implements Comparable<Path> {
         }
         this.addLast(name);
     }
+    
+    public Path(File base, File target) {
+        init();
+        File file = target;
+        while (true) {
+            if (file == null) {
+                throw new RuntimeException(
+                    "base is not an ancestor of target");
+            } else if (file.equals(base)) {
+                break;
+            } else {
+                addFirst(file.getName());
+                file = file.getParentFile();
+            }
+        }
+    }
 
     public Iterator<String> getNameIterator() {
         return nameList.iterator();
@@ -74,6 +79,7 @@ public class Path implements Comparable<Path> {
         nameList.addLast(name);
     }
 
+    @Override
     public int compareTo(Path other) {
         File dotFile = new File(".");
         File a = this.getFile(dotFile);
@@ -93,6 +99,7 @@ public class Path implements Comparable<Path> {
         return file;
     }
 
+    @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
         Iterator<String> iter = nameList.iterator();

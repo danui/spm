@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.eclipse.jgit.revwalk.RevCommit;
+
+
 /**
  * An object for storing Commits ordered by time and by hash.
  */
@@ -23,7 +26,7 @@ public class CommitLog {
     /**
      * Add Commit to database.
      */
-    public void addCommit(Commit commit) {
+    public void add(Commit commit) {
         commitsByHash.put(commit.getHash(), commit);
         commitsByDate.put(commit.getDate(), commit);
     }
@@ -33,8 +36,22 @@ public class CommitLog {
      *
      * @return Commit, or null if there is none matching 'hash'.
      */
-    public Commit getCommit(String hash) {
+    public Commit get(String hash) {
         return commitsByHash.get(hash);
+    }
+    
+    /**
+     * Lookup Commit from RevCommit, creating a new Commit
+     * if necessary.
+     */
+    public Commit lookup(RevCommit revCommit) {
+        String hash = GitTools.readCommitHash(revCommit);
+        Commit commit = get(hash);
+        if (commit == null) {
+            Date date = GitTools.readCommitDate(revCommit);
+            commit = new Commit(hash, date);
+        }
+        return commit;
     }
 
     /**
@@ -42,7 +59,7 @@ public class CommitLog {
      *
      * @return Commit, or null if there is no commit before 'date'.
      */
-    public Commit getCommitBefore(Date date) {
+    public Commit getBefore(Date date) {
         Map.Entry<Date,Commit> entry = commitsByDate.lowerEntry(date);
         if (entry == null)
             return null;

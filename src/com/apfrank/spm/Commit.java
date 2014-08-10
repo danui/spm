@@ -15,7 +15,7 @@ public class Commit {
         this.date = date;
         this.dataMap = new TreeMap<Path,DataPoint>();
     }
-
+    
     public String getHash() {
         return hash;
     }

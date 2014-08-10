@@ -4,6 +4,7 @@ import java.io.File;
 
 import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.CloneCommand;
@@ -12,9 +13,13 @@ import org.eclipse.jgit.api.LogCommand;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.lib.PersonIdent;
+
 
 public class GitTools {
 
+    private static final String HEAD = org.eclipse.jgit.lib.Constants.HEAD;
+    
     /**
      * Get the top-level directory of the repository within 'dir'
      * resides.
@@ -90,5 +95,14 @@ public class GitTools {
         clone.setURI(srcDir.getPath());
         clone.setDirectory(destDir);
         return clone.call();
+    }
+    
+    public static String readCommitHash(RevCommit revCommit) {
+        return revCommit.getName();
+    }
+    
+    public static Date readCommitDate(RevCommit revCommit) {
+        PersonIdent auth = revCommit.getAuthorIdent();
+        return auth.getWhen();
     }
 }

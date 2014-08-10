@@ -56,6 +56,7 @@ public class Project {
         buildTodoFileMap(filenameFilter);
         buildCommitLog();
         performCounting();
+        checkoutLatest();
     }
     
     public File getRepositoryDir() {
@@ -186,5 +187,11 @@ public class Project {
                 dataPoint.increment(symbol);
             }
         }
+    }
+    
+    private void checkoutLatest() throws Exception {
+        CheckoutCommand co = git.checkout();
+        co.setName(branch);
+        Ref ref = co.call();
     }
 }

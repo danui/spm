@@ -35,6 +35,10 @@ public class TodoFile implements Comparable<TodoFile> {
         return path;
     }
     
+    public File getFile() {
+        return path.getFile(project.getRepositoryDir());
+    }
+    
     public Date getFirstDate() {
         return dataPointMap.firstKey();
     }

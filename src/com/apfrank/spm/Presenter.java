@@ -1,5 +1,5 @@
 package com.apfrank.spm;
 
 public interface Presenter {
-    public void present();
+    public void present() throws Exception;
 }

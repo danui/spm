@@ -1,6 +1,7 @@
 package com.apfrank.spm;
 
 import java.io.File;
+import java.util.regex.Pattern;
 import org.eclipse.jgit.api.Git;
 
 /**
@@ -26,9 +27,15 @@ public class Main {
             Git git = GitTools.cloneRepository(repositoryDir, cloneDir,
                                                branch);
 
+            SymbolFilter symbolFilter = new SymbolFilter();
+            symbolFilter.addSymbol("TODO", Pattern.compile("\\s*\\[ \\].*"));
+            symbolFilter.addSymbol("DONE", Pattern.compile("\\s*\\[X\\].*"));
+            
             Project project = new Project(
                 git, branch, projectPath,
-                new ScrumFilenameFilter());
+                new ScrumFilenameFilter(),
+                symbolFilter
+            );
             project.setName(namePath.toString());
             
             // DEVEL:

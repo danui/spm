@@ -26,9 +26,12 @@ public class BasicPresenter implements Presenter {
             Iterator<DataPoint> dpIter = todoFile.getDataPointIterator();
             while (dpIter.hasNext()) {
                 DataPoint dataPoint = dpIter.next();
-                out.format("  %s %8d%n",
+                int todo = dataPoint.getCount("TODO");
+                int total = dataPoint.getTotalCount();
+                double percent = 100.0 * todo / total;
+                out.format("  %s %8d %8d %6.2f%n",
                            dataPoint.getDate(),
-                           dataPoint.getCount(Symbols.TODO));
+                           todo, total, percent);
             }
         }
     }

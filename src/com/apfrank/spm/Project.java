@@ -4,10 +4,14 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.api.LogCommand;
+import org.eclipse.jgit.api.CheckoutCommand;
+import org.eclipse.jgit.lib.Ref;
 
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.Map;
@@ -28,6 +32,8 @@ public class Project {
     private File repositoryDir;
     private File projectDir;
 
+    private SymbolFilter symbolFilter;
+    
     /**
      * Map filename -> TodoFile
      */
@@ -36,12 +42,14 @@ public class Project {
     private CommitLog commitLog;
     
     public Project(Git git, String branch, Path path,
-                   FilenameFilter filenameFilter)
+                   FilenameFilter filenameFilter,
+                   SymbolFilter symbolFilter)
         throws Exception
     {
         this.git = git;
         this.branch = branch;
         this.projectPath = path;
+        this.symbolFilter = symbolFilter;
         repositoryDir = GitTools.getRepositoryDir(git);
         projectDir = projectPath.getFile(repositoryDir);
         projectName = projectPath.toString();
@@ -64,6 +72,10 @@ public class Project {
     
     public void setName(String name) {
         projectName = name;
+    }
+    
+    public SymbolFilter getSymbolFilter() {
+        return symbolFilter;
     }
     
     public int getFileCount() {
@@ -132,7 +144,7 @@ public class Project {
         }
     }
     
-    private void performCounting() {
+    private void performCounting() throws Exception {
         Iterator<Commit> iter = commitLog.getCommitIterator();
         while (iter.hasNext()) {
             Commit commit = iter.next();
@@ -140,9 +152,20 @@ public class Project {
         }
     }
     
-    private void performCountingOnCommit(Commit commit) {
-        // TODO: git checkout commit.getHash();
-        
+    private void performCountingOnCommit(Commit commit)
+        throws Exception
+    {
+        // git checkout commit.getHash();
+        CheckoutCommand co = git.checkout();
+        co.setStartPoint(commit.getRevCommit());
+        co.setCreateBranch(false);
+        co.setForce(false);
+        // This is an anomaly in Jgit. We have to name the commits
+        // we checkout headless is not allowed. So we just use the
+        // hash.
+        co.setName(commit.getHash());
+        Ref ref = co.call();
+        // TODO: what's ref for?
         Iterator<DataPoint> iter = commit.getDataPointIterator();
         while (iter.hasNext()) {
             DataPoint dataPoint = iter.next();
@@ -150,7 +173,18 @@ public class Project {
         }
     }
     
-    private void performCountingOnDataPoint(DataPoint dataPoint) {
-        // TODO...
+    private void performCountingOnDataPoint(DataPoint dataPoint)
+        throws Exception
+    {
+        Path path = dataPoint.getPath();
+        File file = path.getFile(repositoryDir);
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        String line;
+        while (null != (line = reader.readLine())) {
+            String symbol = symbolFilter.getSymbol(line);
+            if (symbol != null) {
+                dataPoint.increment(symbol);
+            }
+        }
     }
 }

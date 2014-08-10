@@ -20,6 +20,9 @@ public class BasicPresenter implements Presenter {
         while (iter.hasNext()) {
             TodoFile todoFile = iter.next();
             out.println("TodoFile: " + todoFile.getName());
+            out.format("  Date range: %s -> %s%n",
+                       todoFile.getFirstDate(),
+                       todoFile.getLastDate());
             Iterator<DataPoint> dpIter = todoFile.getDataPointIterator();
             while (dpIter.hasNext()) {
                 DataPoint dataPoint = dpIter.next();

@@ -10,7 +10,7 @@ $(document).ready(function () {
     
     /*
     <div id="stories" class="padtop">
-        <h1>stories</h1>
+        <h1>stories (finalCount) 12 days</h1>
         <div id="stories-chart" class="chartarea"></div>
         <pre id="stories-text">
         </pre>
@@ -44,7 +44,9 @@ $(document).ready(function () {
         content.setAttribute("class", "padtop");
         
         entryHeader = document.createElement("h1");
-        entryHeader.innerHTML = entry.name;
+        entryHeader.innerHTML = entry.name 
+            + " (" + entry.finalCount + ") "
+            + (entry.duration+0.5).toFixed(0) + " days";
         
         entryChart = document.createElement("div");
         entryChart.setAttribute("id", chartId);

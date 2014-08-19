@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.LinkedList;
+import java.util.Date;
 
 import com.apfrank.json.JsonValue;
 import com.apfrank.json.JsonObject;
@@ -50,6 +51,26 @@ public class Html5Presenter implements Presenter {
     private String getAnchorId(TodoFile todoFile) throws Exception {
         return "anchor" + todoFile.getId();
     }
+    
+    private int getFinalCount(TodoFile todoFile) throws Exception {
+        return todoFile.getLastDataPoint().getCount("TODO");
+    }
+    
+    private double getDays(Date date) {
+        return date.getTime() / 1000.0 / 60.0 / 60.0 / 24.0;
+    }
+    
+    private double getDuration(TodoFile todoFile) throws Exception {
+        Date first = todoFile.getFirstDate();
+        int finalCount = getFinalCount(todoFile);
+        Date last;
+        if (finalCount > 0) {
+            last = new Date();
+        } else {
+            last = todoFile.getLastDate();
+        }
+        return getDays(last) - getDays(first);
+    }
 
     private void presentProject() throws Exception {
         presentProjectText();
@@ -90,6 +111,8 @@ public class Html5Presenter implements Presenter {
         JsonObject entry = new JsonObject();
         entry.put("id", todoFile.getId());
         entry.put("name", todoFile.getName());
+        entry.put("finalCount", new JsonNumber(getFinalCount(todoFile)));
+        entry.put("duration", new JsonNumber(getDuration(todoFile)));
         JsonArray data = new JsonArray();
         Iterator<DataPoint> iter = todoFile.getDataPointIterator();
         while (iter.hasNext()) {

@@ -67,6 +67,10 @@ public class TodoFile implements Comparable<TodoFile> {
         return dataPointMap.lastKey();
     }
     
+    public DataPoint getLastDataPoint() {
+        return dataPointMap.get(getLastDate());
+    }
+    
     public void addDataPoint(DataPoint dataPoint) {
         // NOTE: If two datapoints have the same date, then the latest
         // dataPoint to be added will replace the other. This is possible

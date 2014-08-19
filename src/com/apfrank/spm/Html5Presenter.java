@@ -82,6 +82,7 @@ public class Html5Presenter implements Presenter {
             entries.append(buildEntry(todoFile));
         }
         spmData.put("entries", entries);
+        spmData.put("projectName", project.getName());
         return spmData;
     }
     

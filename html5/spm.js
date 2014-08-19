@@ -2,7 +2,9 @@ $(document).ready(function () {
     var spm = spmData;
 
     function fixupTitle() {
-        $("title").html("Hello");
+        if (spm.hasOwnProperty("projectName")) {
+            $("title").html(spm.projectName);
+        }
     }
 
     
@@ -48,26 +50,21 @@ $(document).ready(function () {
         entryChart.setAttribute("id", chartId);
         entryChart.setAttribute("class", "chartarea");
 
-        if (false) {
-            entryText = document.createElement("pre");
-            entryText.setAttribute("id", preId);
-            var s = "";
-            var i, n;
-            n = entry.text.length;
-            for (i = 0; i < n; ++i) {
-                s += entry.text[i] + "\n";
-            }
-            entryText.innerHTML = s;
-        } else {
-            entryText = document.getElementById(preId);
-        }
+        entryText = document.getElementById(preId);
+        entryText.setAttribute("class", "textarea");
 
         content.appendChild(entryHeader);
         content.appendChild(entryChart);
         content.appendChild(entryText);
         myContents.appendChild(content);
         
-        var plot = $.jqplot(chartId,  [ entry.data ]);
+        var plot = $.jqplot(chartId,  [ entry.data ], {
+            axes: {
+                yaxis: {
+                    min: 0
+                }
+            }
+        });
         $(window).resize(function() {
             plot.replot( { resetAxes: true } );
         });

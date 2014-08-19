@@ -4,17 +4,20 @@ import java.io.File;
 import java.util.TreeMap;
 import java.util.Date;
 import java.util.Iterator;
+import java.security.MessageDigest;
 
 public class TodoFile implements Comparable<TodoFile> {
 
     private Project project;
     private Path path;
     private TreeMap<Date,DataPoint> dataPointMap;
+    private String id;
     
     public TodoFile(Project project, Path path) {
         this.project = project;
         this.path = path;
         this.dataPointMap = new TreeMap<Date,DataPoint>();
+        this.id = null;
     }
 
     @Override
@@ -25,6 +28,23 @@ public class TodoFile implements Comparable<TodoFile> {
     @Override
     public String toString() {
         return path.toString();
+    }
+    
+    /**
+     * @return Id generated from name.
+     */
+    public String getId() throws Exception {
+        if (id == null) {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(this.getName().getBytes());
+            byte[] buf = md.digest();
+            StringBuffer sb = new StringBuffer();
+            for (int i=0; i < buf.length; ++i) {
+                sb.append(String.format("%02x", buf[i]));
+            }
+            id = sb.toString();
+        }
+        return id;
     }
     
     public String getName() {

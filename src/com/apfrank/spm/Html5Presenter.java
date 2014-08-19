@@ -7,6 +7,14 @@ import java.io.PrintStream;
 import java.io.File;
 import java.io.FileReader;
 import java.util.Iterator;
+import java.util.TreeMap;
+import java.util.LinkedList;
+
+import com.apfrank.json.JsonValue;
+import com.apfrank.json.JsonObject;
+import com.apfrank.json.JsonArray;
+import com.apfrank.json.JsonString;
+import com.apfrank.json.JsonNumber;
 
 public class Html5Presenter implements Presenter {
 
@@ -19,74 +27,85 @@ public class Html5Presenter implements Presenter {
     }
 
     public void present() throws Exception {
-        out.println("<!DOCTYPE html><html lang=\"en\">");
-        presentHead();
-        presentBody();
-        out.println("</html>");
-    }
-    
-    private void presentHead() throws Exception {
-        out.println("<head>");
-        presentResource("html5/headMetadata.html");
-        out.format("<title>%s</title>%n", project.getName());
+        presentResource("html5/top.html");
         presentCss("html5/bootstrap.min.css");
         presentCss("html5/spm.css");
-        out.println("</head>");
-    }
-    
-    public void presentBody() throws Exception {
-        out.println("<body>");
-        out.println("<div class='container'>");
-        presentNav();
-        presentTodoFileContentSection();
-        out.println("</div>");
+        presentResource("html5/middle.html");
         presentJavaScript("html5/jquery.min.js");
         presentJavaScript("html5/jquery.jqplot.min.js");
         presentJavaScript("html5/bootstrap.min.js");
-        presentTodoFileDataSection();
-        out.println("</body>");
+        presentProject();
+        presentJavaScript("html5/spm.js");
+        presentResource("html5/bottom.html");
     }
     
-    private void presentNav() throws Exception {
-        presentResource("html5/navOptionsBegin.html");
+    private String getTextId(TodoFile todoFile) throws Exception {
+        return "text" + todoFile.getId();
+    }
+    
+    private String getChartId(TodoFile todoFile) throws Exception {
+        return "chart" + todoFile.getId();
+    }
+    
+    private String getAnchorId(TodoFile todoFile) throws Exception {
+        return "anchor" + todoFile.getId();
+    }
+
+    private void presentProject() throws Exception {
+        presentProjectText();
+        presentProjectData();
+    }
+    
+    private void presentProjectText() throws Exception {
         Iterator<TodoFile> iter = project.getTodoFileIterator();
         while (iter.hasNext()) {
             TodoFile todoFile = iter.next();
-            presentNavOption(todoFile.getName());
+            out.format("<pre id=\"%s\">", getTextId(todoFile));
+            presentFile(todoFile.getFile());
+            out.format("</pre>");
         }
-        presentResource("html5/navOptionsEnd.html");
     }
     
-    private void presentNavOption(String name) throws Exception {
-        out.format("<li><a href=\"#%s\">%s</a></li>%n",
-                   name, name);
+    private void presentProjectData() throws Exception {
+        JsonObject spmData = buildSpmData();
+        out.println("<script type='text/javascript'>");
+        out.println("var spmData = " + spmData.toJson() + ";");
+        out.println("</script>");
     }
-
-    private void presentTodoFileContentSection() throws Exception {
-        presentResource("html5/todoFileContentSectionBegin.html");
+    
+    private JsonObject buildSpmData() throws Exception {
+        JsonObject spmData = new JsonObject();
+        JsonArray entries = new JsonArray();
         Iterator<TodoFile> iter = project.getTodoFileIterator();
         while (iter.hasNext()) {
             TodoFile todoFile = iter.next();
-            presentTodoFileContent(todoFile);
+            entries.append(buildEntry(todoFile));
         }
-        presentResource("html5/todoFileContentSectionEnd.html");
-    }
-
-    private void presentTodoFileContent(TodoFile todoFile)
-        throws Exception
-    {
-        String name = todoFile.getName();
-        String chartName = "chart" + todoFile.hashCode();
-        out.format(
-            "<h1 id=\"%s\" class=\"padtop page-header\">%s</h1>%n" +
-            "<div class=\"chartrow\">%n"+
-            "<div id=\"%s\" class=\"chartarea\"></div>%n"+
-            "</div><div class=\"textrow\"><pre>%n",
-            name, name, chartName);
-        presentFile(todoFile.getFile());
-        out.format("</pre></div>%n");
+        spmData.put("entries", entries);
+        return spmData;
     }
     
+    private JsonValue buildEntry(TodoFile todoFile) throws Exception {
+        JsonObject entry = new JsonObject();
+        entry.put("id", todoFile.getId());
+        entry.put("name", todoFile.getName());
+        JsonArray data = new JsonArray();
+        Iterator<DataPoint> iter = todoFile.getDataPointIterator();
+        while (iter.hasNext()) {
+            DataPoint point = iter.next();
+            long time = point.getDate().getTime() - project.getBaseTime();
+            double day = 1.0 * time / 1000.0 / 60.0 / 60.0 / 24.0;
+            JsonArray jsonPoint = new JsonArray();
+            jsonPoint
+                .append(new JsonNumber(day))
+                .append(new JsonNumber(point.getCount("TODO")))
+                ;
+            data.append(jsonPoint);
+        }
+        entry.put("data", data);
+        return entry;
+    }
+        
     private void presentCss(String path) throws Exception {
         out.println("<style>");
         presentResource(path);
@@ -99,50 +118,6 @@ public class Html5Presenter implements Presenter {
         presentResource(path);
         out.println("}());");
         out.println("</script>");
-    }
-    
-    private void presentTodoFileDataSection() throws Exception {
-        out.println("<script type='text/javascript'>");
-        Iterator<TodoFile> iter = project.getTodoFileIterator();
-        while (iter.hasNext()) {
-            TodoFile todoFile = iter.next();
-            presentTodoFileData(todoFile);
-        }
-        out.println("</script>");
-    }
-    
-    private void presentTodoFileData(TodoFile todoFile)
-        throws Exception
-    {
-        String name = todoFile.getName();
-        String chartName = "chart" + todoFile.hashCode();
-        long baseTime = project.getBaseTime();
-        out.format("$(document).ready(function () {");
-        
-        out.format("var plot = $.jqplot(\"%s\", [[%n",
-                   chartName);
-        Iterator<DataPoint> iter = todoFile.getDataPointIterator();
-        boolean first = true;
-        while (iter.hasNext()) {
-            DataPoint point = iter.next();
-            long time = point.getDate().getTime() - baseTime;
-            double day = 1.0 * time / 1000.0 / 60.0 / 60.0 / 24.0;
-            if (first) {
-                first = false;
-            } else {
-                out.format(",");
-            }
-            out.format("[%.2f,%d]%n",
-                       day,
-                       point.getCount("TODO"));
-        }
-        out.format("]]);");
-        
-        out.format("$(window).resize(function () {%n"+
-                   "    plot.replot({resetAxes:true});%n"+
-                   "});%n");
-        
-        out.format("});%n");
     }
     
     private void presentFile(File file) throws Exception {

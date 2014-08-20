@@ -128,7 +128,7 @@ public class Html5Presenter implements Presenter {
                 .append(new JsonNumber(count));
             JsonArray percentPoint = new JsonArray()
                 .append(day)
-                .append(new JsonNumber((double)count/(double)total));
+                .append(new JsonNumber(1.0 * count / total));
             todoCounts.append(countPoint);
             todoPercents.append(percentPoint);
         }

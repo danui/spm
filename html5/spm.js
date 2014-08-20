@@ -60,16 +60,19 @@ $(document).ready(function () {
         content.appendChild(entryText);
         myContents.appendChild(content);
         
-        var plot = $.jqplot(chartId,  [ entry.todoCounts, entry.todoPercents ], {
+        var plot = $.jqplot(chartId,  [ entry.todoPercents, entry.todoCounts ], {
             axes: {
-                yaxis: {
-                    min: 0
-                },
-                y2axis: { min: 0 }
+                yaxis: { min: 0, numberTicks: 11 },
+                y2axis: { min: 0, max: 1, numberTicks: 11}
             },
             series: [
-                {},
-                { yaxis: "y2axis" }
+                { 
+                    yaxis: "y2axis", fill: true, fillToZero: true,
+                    color: "#888", fillAlpha: 0.5
+                },
+                {
+                    color: "#555"
+                }
             ]
         });
         $(window).resize(function() {

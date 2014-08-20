@@ -113,20 +113,27 @@ public class Html5Presenter implements Presenter {
         entry.put("name", todoFile.getName());
         entry.put("finalCount", new JsonNumber(getFinalCount(todoFile)));
         entry.put("duration", new JsonNumber(getDuration(todoFile)));
-        JsonArray data = new JsonArray();
+        JsonArray todoCounts = new JsonArray();
+        JsonArray todoPercents = new JsonArray();
         Iterator<DataPoint> iter = todoFile.getDataPointIterator();
         while (iter.hasNext()) {
             DataPoint point = iter.next();
             long time = point.getDate().getTime() - project.getBaseTime();
-            double day = 1.0 * time / 1000.0 / 60.0 / 60.0 / 24.0;
-            JsonArray jsonPoint = new JsonArray();
-            jsonPoint
-                .append(new JsonNumber(day))
-                .append(new JsonNumber(point.getCount("TODO")))
-                ;
-            data.append(jsonPoint);
+            JsonNumber day = new JsonNumber(1.0 * time / 1000.0 / 60.0 / 60.0 / 24.0);
+            int count = point.getCount("TODO");
+            int total = point.getTotalCount();
+            
+            JsonArray countPoint = new JsonArray()
+                .append(day)
+                .append(new JsonNumber(count));
+            JsonArray percentPoint = new JsonArray()
+                .append(day)
+                .append(new JsonNumber((double)count/(double)total));
+            todoCounts.append(countPoint);
+            todoPercents.append(percentPoint);
         }
-        entry.put("data", data);
+        entry.put("todoCounts", todoCounts);
+        entry.put("todoPercents", todoPercents);
         return entry;
     }
         

@@ -60,12 +60,17 @@ $(document).ready(function () {
         content.appendChild(entryText);
         myContents.appendChild(content);
         
-        var plot = $.jqplot(chartId,  [ entry.data ], {
+        var plot = $.jqplot(chartId,  [ entry.todoCounts, entry.todoPercents ], {
             axes: {
                 yaxis: {
                     min: 0
-                }
-            }
+                },
+                y2axis: { min: 0 }
+            },
+            series: [
+                {},
+                { yaxis: "y2axis" }
+            ]
         });
         $(window).resize(function() {
             plot.replot( { resetAxes: true } );

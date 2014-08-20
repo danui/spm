@@ -4,6 +4,7 @@ $(document).ready(function () {
     function fixupTitle() {
         if (spm.hasOwnProperty("projectName")) {
             $("title").html(spm.projectName);
+            $("#myBrand").html(spm.projectName);
         }
     }
 

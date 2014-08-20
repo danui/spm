@@ -33,7 +33,7 @@ public class Main {
             
             Project project = new Project(
                 git, branch, projectPath,
-                new ScrumFilenameFilter(),
+                new TodoFilenameFilter(),
                 symbolFilter
             );
             project.setName(namePath.toString());

@@ -27,12 +27,23 @@ $(document).ready(function () {
         myDropdownMenu.appendChild(listElement);
     }
     
+    function createKeyValue(key, value) {
+        var span = document.createElement("span");
+        var keyElement = document.createElement("b");
+        keyElement.innerHTML = key + ": ";
+        var valueElement = document.createTextNode(value);
+        span.appendChild(keyElement);
+        span.appendChild(valueElement);
+        return span;
+    }
+    
     function insertEntry(entry) {
         var myContents,
             content,
             entryHeader,
             entryChart,
-            entryText;
+            entryText,
+            entryStats;
         
         var id = entry.id;
         var chartId = "chart" + id;
@@ -44,9 +55,12 @@ $(document).ready(function () {
         content.setAttribute("class", "padtop");
         
         entryHeader = document.createElement("h1");
-        entryHeader.innerHTML = entry.name 
-            + " (" + entry.finalCount + ") "
-            + (entry.duration+0.5).toFixed(0) + " days";
+        entryHeader.innerHTML = entry.name;
+        
+        entryStats = document.createElement("p");
+        entryStats.appendChild(createKeyValue("Remaining", entry.finalCount + " items"));
+        entryStats.appendChild(document.createTextNode(", "));
+        entryStats.appendChild(createKeyValue("Duration", (entry.duration+0.5).toFixed(0) + " days"));
         
         entryChart = document.createElement("div");
         entryChart.setAttribute("id", chartId);
@@ -56,6 +70,7 @@ $(document).ready(function () {
         entryText.setAttribute("class", "textarea");
 
         content.appendChild(entryHeader);
+        content.appendChild(entryStats);
         content.appendChild(entryChart);
         content.appendChild(entryText);
         myContents.appendChild(content);
@@ -68,7 +83,7 @@ $(document).ready(function () {
             series: [
                 { 
                     yaxis: "y2axis", fill: true, fillToZero: true,
-                    color: "#888", fillAlpha: 0.5
+                    color: "#888", fillAlpha: 0.25
                 },
                 {
                     color: "#555"
@@ -79,7 +94,11 @@ $(document).ready(function () {
             plot.replot( { resetAxes: true } );
         });
 
-        insertDropdownMenu(entry.id, entry.name);
+        var dropDownName = entry.name;
+        if (entry.finalCount > 0) {
+            dropDownName += " (" + entry.finalCount + ")";
+        }
+        insertDropdownMenu(entry.id, dropDownName);
     }
     
     function main() {

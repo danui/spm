@@ -94,47 +94,113 @@ public class Html5Presenter implements Presenter {
         out.println("</script>");
     }
     
+    /**
+     * Build the SPM Data object.
+     */
     private JsonObject buildSpmData() throws Exception {
         JsonObject spmData = new JsonObject();
         JsonArray entries = new JsonArray();
+        entries.append(buildAggregateEntry());
         Iterator<TodoFile> iter = project.getTodoFileIterator();
         while (iter.hasNext()) {
             TodoFile todoFile = iter.next();
-            entries.append(buildEntry(todoFile));
+            entries.append(buildTodoFileEntry(todoFile));
         }
         spmData.put("entries", entries);
         spmData.put("projectName", project.getName());
         return spmData;
     }
     
-    private JsonValue buildEntry(TodoFile todoFile) throws Exception {
+    private JsonValue buildTodoFileEntry(TodoFile todoFile) throws Exception {
+        return buildEntry(todoFile.getId(),
+                          todoFile.getName(),
+                          todoFile.getDataPointIterator());
+    }
+    
+    /**
+     * Builds a special entry based on aggregated data.
+     */
+    private JsonValue buildAggregateEntry() throws Exception {
+        return buildEntry(project.getId(),
+                          "Project",
+                          project.getAggregatedDataPointIterator());
+    }
+    
+    private JsonValue buildEntry(String id,
+                                 String name,
+                                 Iterator<DataPoint> iter)
+    {
         JsonObject entry = new JsonObject();
-        entry.put("id", todoFile.getId());
-        entry.put("name", todoFile.getName());
-        entry.put("finalCount", new JsonNumber(getFinalCount(todoFile)));
-        entry.put("duration", new JsonNumber(getDuration(todoFile)));
+        entry.put("id", id);
+        entry.put("name", name);
         JsonArray todoCounts = new JsonArray();
         JsonArray todoPercents = new JsonArray();
-        Iterator<DataPoint> iter = todoFile.getDataPointIterator();
+        DataPoint firstDataPoint = null;
+        DataPoint lastDataPoint = null;
         while (iter.hasNext()) {
             DataPoint point = iter.next();
+            if (firstDataPoint == null) {
+                firstDataPoint = point;
+            }
+            lastDataPoint = point;
+            
             long time = point.getDate().getTime() - project.getBaseTime();
             JsonNumber day = new JsonNumber(1.0 * time / 1000.0 / 60.0 / 60.0 / 24.0);
             int count = point.getCount("TODO");
             int total = point.getTotalCount();
-            
+
             JsonArray countPoint = new JsonArray()
                 .append(day)
                 .append(new JsonNumber(count));
             JsonArray percentPoint = new JsonArray()
                 .append(day)
                 .append(new JsonNumber(1.0 * (total - count) / total));
+            
             todoCounts.append(countPoint);
             todoPercents.append(percentPoint);
         }
         entry.put("todoCounts", todoCounts);
         entry.put("todoPercents", todoPercents);
+
+        if (lastDataPoint == null) {
+            entry.put("finalCount", new JsonNumber(0));
+        } else {
+            entry.put("finalCount", new JsonNumber(
+                lastDataPoint.getCount("TODO")));
+        }
+        
+        if (firstDataPoint == null) {
+            entry.put("dutation", new JsonNumber(0));
+        } else {
+            double t0 = firstDataPoint.getDate().getTime();
+            double t1 = lastDataPoint.getDate().getTime();
+            double elapsed = (t1-t0) / 1000 / 60 /60 / 24;
+            entry.put("duration", new JsonNumber(elapsed));
+        }
+
         return entry;
+    }
+    
+    /**
+     * Read a DataPoint into counts and percents JsonArrays.
+     */
+    private void readDataPoint(DataPoint point,
+                               JsonArray counts,
+                               JsonArray percents)
+    {
+        long time = point.getDate().getTime() - project.getBaseTime();
+        JsonNumber day = new JsonNumber(1.0 * time / 1000.0 / 60.0 / 60.0 / 24.0);
+        int count = point.getCount("TODO");
+        int total = point.getTotalCount();
+
+        JsonArray countPoint = new JsonArray()
+            .append(day)
+            .append(new JsonNumber(count));
+        JsonArray percentPoint = new JsonArray()
+            .append(day)
+            .append(new JsonNumber(1.0 * (total - count) / total));
+        counts.append(countPoint);
+        percents.append(percentPoint);
     }
         
     private void presentCss(String path) throws Exception {

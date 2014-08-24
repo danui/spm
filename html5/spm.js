@@ -68,12 +68,16 @@ $(document).ready(function () {
         entryChart.setAttribute("class", "chartarea");
 
         entryText = document.getElementById(preId);
-        entryText.setAttribute("class", "textarea");
+        if (entryText !== null) {
+            entryText.setAttribute("class", "textarea");
+        }
 
         content.appendChild(entryHeader);
         content.appendChild(entryStats);
         content.appendChild(entryChart);
-        content.appendChild(entryText);
+        if (entryText !== null) {
+            content.appendChild(entryText);
+        }
         myContents.appendChild(content);
         
         var plot = $.jqplot(chartId,  [ entry.todoPercents, entry.todoCounts ], {

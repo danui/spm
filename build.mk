@@ -16,7 +16,6 @@ CLASS_FILES=						\
 	out/com/apfrank/spm/SymbolFilter.class		\
 	out/com/apfrank/spm/TodoFile.class		\
 	out/com/apfrank/spm/UsageException.class	\
-	out/com/apfrank/spm/TaskState.class		\
 
 build: $(CLASS_FILES)
 
@@ -28,7 +27,7 @@ spm.jar: build
 	bash scripts/makejar.sh
 #	jar cvfm spm.jar manifest.txt -C out com
 
-install:
+install: spm.jar
 	cp -vf spm.jar $(INSTALL_DIR)/.
 
 clean:

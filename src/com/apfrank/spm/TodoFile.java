@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.TreeMap;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Map;
 import java.security.MessageDigest;
 
 public class TodoFile implements Comparable<TodoFile> {
@@ -35,14 +36,7 @@ public class TodoFile implements Comparable<TodoFile> {
      */
     public String getId() throws Exception {
         if (id == null) {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(this.getName().getBytes());
-            byte[] buf = md.digest();
-            StringBuffer sb = new StringBuffer();
-            for (int i=0; i < buf.length; ++i) {
-                sb.append(String.format("%02x", buf[i]));
-            }
-            id = sb.toString();
+            id = HashTool.getMd5(this.getName());
         }
         return id;
     }
@@ -69,6 +63,14 @@ public class TodoFile implements Comparable<TodoFile> {
     
     public DataPoint getLastDataPoint() {
         return dataPointMap.get(getLastDate());
+    }
+    
+    public DataPoint getDataPointAtOrBefore(Date date) {
+        Map.Entry<Date,DataPoint> entry = dataPointMap.floorEntry(date);
+        if (entry == null) {
+            return null;
+        }
+        return entry.getValue();
     }
     
     public void addDataPoint(DataPoint dataPoint) {

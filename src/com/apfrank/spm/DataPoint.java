@@ -2,6 +2,7 @@ package com.apfrank.spm;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * A DataPoint exists in at the intersection of time and space.
@@ -40,15 +41,26 @@ public class DataPoint {
     public int getTotalCount() {
         return totalCount;
     }
+    
+    public Iterator<String> getSymbolIterator() {
+        return countMap.keySet().iterator();
+    }
 
     public void increment(String symbolName) {
+        increment(symbolName, 1);
+    }
+    
+    /**
+     * Increment symbol with name 'symbolName' by 'amount'.
+     */
+    public void increment(String symbolName, int amount) {
         Integer count = countMap.get(symbolName);
         if (count != null) {
-            count = count + 1;
+            count += amount;
         } else {
-            count = new Integer(1);
+            count = new Integer(amount);
         }
         countMap.put(symbolName, count);
-        totalCount += 1;
+        totalCount += amount;
     }
 }

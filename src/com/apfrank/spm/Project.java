@@ -16,6 +16,8 @@ import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.LinkedList;
+import java.util.Date;
 
 /**
  * A Project object provides an interface to access information about
@@ -41,6 +43,8 @@ public class Project {
 
     private CommitLog commitLog;
     
+    private LinkedList<DataPoint> aggregatedDataPointList;
+    
     public Project(Git git, String branch, Path path,
                    FilenameFilter filenameFilter,
                    SymbolFilter symbolFilter)
@@ -57,6 +61,7 @@ public class Project {
         buildCommitLog();
         performCounting();
         checkoutLatest();
+        buildAggregatedDataPointList();
     }
     
     public File getRepositoryDir() {
@@ -69,6 +74,10 @@ public class Project {
     
     public String getName() {
         return projectName;
+    }
+    
+    public String getId() throws Exception {
+        return HashTool.getMd5(projectName);
     }
     
     public void setName(String name) {
@@ -100,6 +109,13 @@ public class Project {
 
     public Iterator<TodoFile> getTodoFileIterator() {
         return todoFileMap.values().iterator();
+    }
+    
+    /**
+     * @return Iterator over aggregated data points.
+     */
+    public Iterator<DataPoint> getAggregatedDataPointIterator() {
+        return aggregatedDataPointList.iterator();
     }
     
     /**
@@ -200,5 +216,31 @@ public class Project {
         CheckoutCommand co = git.checkout();
         co.setName(branch);
         Ref ref = co.call();
+    }
+    
+    private void buildAggregatedDataPointList() {
+        aggregatedDataPointList = new LinkedList<DataPoint>();
+        long lowerTime = commitLog.getFirstDate().getTime();
+        long upperTime = commitLog.getLastDate().getTime();
+        final long aDay = 1000 * 60 * 60 * 24;
+        for (long t = lowerTime; t <= upperTime; t += aDay) {
+            Date sampleDate = new Date(t);
+            DataPoint dataPoint = new DataPoint(sampleDate, projectPath);
+            Iterator<TodoFile> iter = getTodoFileIterator();
+            while (iter.hasNext()) {
+                TodoFile todoFile = iter.next();
+                DataPoint filePoint =
+                    todoFile.getDataPointAtOrBefore(sampleDate);
+                if (filePoint == null) {
+                    continue;
+                }
+                Iterator<String> symbolIter = filePoint.getSymbolIterator();
+                while (symbolIter.hasNext()) {
+                    String symbol = symbolIter.next();
+                    dataPoint.increment(symbol, filePoint.getCount(symbol));
+                }
+            }
+            aggregatedDataPointList.add(dataPoint);
+        }
     }
 }

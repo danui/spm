@@ -62,6 +62,21 @@ $(document).ready(function () {
         entryStats.appendChild(createKeyValue("Remaining", entry.finalCount + " items"));
         entryStats.appendChild(document.createTextNode(", "));
         entryStats.appendChild(createKeyValue("Duration", (entry.duration+0.5).toFixed(0) + " days"));
+        if (entry.finalTotal > 0 &&
+            entry.finalTotal > entry.finalCount &&
+            entry.finalCount > 0 &&
+            entry.duration > 0)
+        {
+            (function () {
+                var k = entry.finalCount;
+                var n = entry.finalTotal;
+                var t = entry.duration;
+                var eta = t * n / (n-k);
+                eta = eta.toFixed(1);
+                entryStats.appendChild(document.createTextNode(", "));
+                entryStats.appendChild(createKeyValue("ETA", eta + " days"));
+            }());
+        }
         
         entryChart = document.createElement("div");
         entryChart.setAttribute("id", chartId);

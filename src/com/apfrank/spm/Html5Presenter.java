@@ -162,47 +162,28 @@ public class Html5Presenter implements Presenter {
         entry.put("todoCounts", todoCounts);
         entry.put("todoPercents", todoPercents);
 
-        if (lastDataPoint == null) {
-            entry.put("finalCount", new JsonNumber(0));
-        } else {
-            entry.put("finalCount", new JsonNumber(
-                lastDataPoint.getCount("TODO")));
+        int finalCount = 0;
+        int finalTotal = 0;
+        double duration = 0.0;
+        if (lastDataPoint != null) {
+            finalCount = lastDataPoint.getCount("TODO");
+            finalTotal = lastDataPoint.getTotalCount();
+            double t0, t1;
+            t0 = firstDataPoint.getDate().getTime();
+            if (finalCount > 0) {
+                t1 = new Date().getTime();
+            } else {
+                t1 = lastDataPoint.getDate().getTime();
+            }
+            duration = (t1-t0) / 1000 / 60 /60 / 24;
         }
-        
-        if (firstDataPoint == null) {
-            entry.put("dutation", new JsonNumber(0));
-        } else {
-            double t0 = firstDataPoint.getDate().getTime();
-            double t1 = lastDataPoint.getDate().getTime();
-            double elapsed = (t1-t0) / 1000 / 60 /60 / 24;
-            entry.put("duration", new JsonNumber(elapsed));
-        }
+        entry.put("finalCount", new JsonNumber(finalCount));
+        entry.put("finalTotal", new JsonNumber(finalTotal));
+        entry.put("duration", new JsonNumber(duration));
 
         return entry;
     }
     
-    /**
-     * Read a DataPoint into counts and percents JsonArrays.
-     */
-    private void readDataPoint(DataPoint point,
-                               JsonArray counts,
-                               JsonArray percents)
-    {
-        long time = point.getDate().getTime() - project.getBaseTime();
-        JsonNumber day = new JsonNumber(1.0 * time / 1000.0 / 60.0 / 60.0 / 24.0);
-        int count = point.getCount("TODO");
-        int total = point.getTotalCount();
-
-        JsonArray countPoint = new JsonArray()
-            .append(day)
-            .append(new JsonNumber(count));
-        JsonArray percentPoint = new JsonArray()
-            .append(day)
-            .append(new JsonNumber(1.0 * (total - count) / total));
-        counts.append(countPoint);
-        percents.append(percentPoint);
-    }
-        
     private void presentCss(String path) throws Exception {
         out.println("<style>");
         presentResource(path);

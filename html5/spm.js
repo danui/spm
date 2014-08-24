@@ -38,6 +38,31 @@ $(document).ready(function () {
         return span;
     }
     
+    function humanDays(days) {
+        var t = days;
+        var u = "day";
+        if (t < 1) {
+            // If less than a day, count in hours.
+            t *= 24;
+            u = "hour";
+        } else if (t > 14) {
+            // If more than 14 days, count in weeks.
+            t /= 7;
+            u = "week";
+        } else if (t > 365/4) {
+            // If more than 1/4 year, count in months.
+            t = t * 12.0 / 365;
+            u = "month";
+        }
+
+        t += 0.5;
+        t = t.toFixed(0);
+        if (t != 1) {
+            u += "s";
+        }
+        return t + " " + u;
+    }
+    
     function insertEntry(entry) {
         var myContents,
             content,
@@ -59,9 +84,25 @@ $(document).ready(function () {
         entryHeader.innerHTML = entry.name;
         
         entryStats = document.createElement("p");
-        entryStats.appendChild(createKeyValue("Remaining", entry.finalCount + " items"));
-        entryStats.appendChild(document.createTextNode(", "));
-        entryStats.appendChild(createKeyValue("Duration", (entry.duration+0.5).toFixed(0) + " days"));
+        (function () {
+            var msg;
+            var n = entry.finalTotal;
+            var k = n - entry.finalCount;
+            if (n > 0) {
+                var p = 100.0 * k / n;
+                p = p.toFixed(0);
+                msg = k + " of " + n + " items ("+p+"%)";
+            } else {
+                msg = "n/a";
+            }
+            entryStats.appendChild(createKeyValue("Completed", msg));
+        }());
+        (function () {
+            if (entryStats.hasChildNodes()) {
+                entryStats.appendChild(document.createTextNode(", "));
+            }
+            entryStats.appendChild(createKeyValue("Duration", humanDays(entry.duration)));
+        }());
         if (entry.finalTotal > 0 &&
             entry.finalTotal > entry.finalCount &&
             entry.finalCount > 0 &&
@@ -72,9 +113,10 @@ $(document).ready(function () {
                 var n = entry.finalTotal;
                 var t = entry.duration;
                 var eta = t * n / (n-k);
-                eta = eta.toFixed(1);
-                entryStats.appendChild(document.createTextNode(", "));
-                entryStats.appendChild(createKeyValue("ETA", eta + " days"));
+                if (entryStats.hasChildNodes()) {
+                    entryStats.appendChild(document.createTextNode(", "));
+                }
+                entryStats.appendChild(createKeyValue("ETA", humanDays(eta)));
             }());
         }
         

@@ -35,3 +35,12 @@ clean:
 	find . -name "*.class" -exec rm -vf \{\} \+
 	rm -vf spm.jar
 	rm -rf out
+
+doc: build
+	javadoc 			\
+		-d javadoc-out		\
+		-link http://docs.oracle.com/javase/6/docs/api	\
+		-classpath out		\
+		-sourcepath src		\
+		com.apfrank.spm		\
+		com.apfrank.json	\

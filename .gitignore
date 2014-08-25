@@ -3,4 +3,5 @@
 Makefile
 spm.jar
 out/
+javadoc-out/
 .DS_Store

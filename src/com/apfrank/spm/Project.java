@@ -24,7 +24,7 @@ import java.util.Date;
  * an SPM Git Directory. This does not know about stories, backlog, etc.
  * We defer that to higher level logic.
  */
-public class Project implements DataSource {
+public class Project {
 
     private Git git;
     private String branch;
@@ -44,7 +44,7 @@ public class Project implements DataSource {
     private CommitLog commitLog;
     
     private LinkedList<DataPoint> aggregatedDataPointList;
-    private TreeMap<Date,DataPoint> dataPoints;
+    private AggregatedSource aggregatedSource;
     
     public Project(Git git, String branch, Path path,
                    FilenameFilter filenameFilter,
@@ -73,85 +73,12 @@ public class Project implements DataSource {
         return projectDir;
     }
     
-    @Override // DataSource
     public String getName() {
         return projectName;
     }
     
-    @Override // DataSource
     public String getId() {
         return HashTool.getMd5(projectName);
-    }
-    
-    @Override // DataSource
-    public Iterator<Date> getDates() {
-        final Iterator<Commit> commits = commitLog.getCommitIterator();
-        return new Iterator<Date>() {
-            @Override
-            public boolean hasNext() {
-                return commits.hasNext();
-            }
-            @Override
-            public Date next() {
-                Commit commit = commits.next();
-                if (commit == null) {
-                    return null;
-                }
-                return commit.getDate();
-            }
-            public void remove() {
-            }
-        };
-    }
-    
-    @Override // DataSource
-    public Date getFirstDate() {
-        return commitLog.getFirstDate();
-    }
-    
-    @Override // DataSource
-    public Date getLastDate() {
-        return commitLog.getLastDate();
-    }
-
-    @Override // DataSource
-    public int getDoneCount(Date date) {
-        return getCount(date, "DONE");
-    }
-    
-    @Override // DataSource
-    public int getTodoCount(Date date) {
-        return getCount(date, "TODO");
-    }
-    
-    @Override // DataSource
-    public int getTotalCount(Date date) {
-        return getDoneCount(date) + getTodoCount(date);
-    }
-    
-    /**
-     * Get count.
-     */
-    private int getCount(Date date, String symbol) {
-        if (dataPoints == null) {
-            dataPoints = new TreeMap<Date,DataPoint>();
-        }
-        if (dataPoints.containsKey(date)) {
-            return dataPoints.get(date).getCount(symbol);
-        }
-        DataPoint dp = new DataPoint(date, projectPath);
-        Iterator<TodoFile> todoFileIter = todoFileMap.values().iterator();
-        while (todoFileIter.hasNext()) {
-            TodoFile todoFile = todoFileIter.next();
-            DataPoint todoPoint = todoFile.getDataPointAtOrBefore(date);
-            if (todoPoint == null) {
-                continue;
-            }
-            dp.increment("DONE", todoPoint.getCount("DONE"));
-            dp.increment("TODO", todoPoint.getCount("TODO"));
-        }
-        dataPoints.put(date, dp);
-        return dp.getCount(symbol);
     }
     
     public void setName(String name) {
@@ -162,6 +89,18 @@ public class Project implements DataSource {
         return symbolFilter;
     }
     
+    public DataSource getAggregatedSource() {
+        if (aggregatedSource == null) {
+            aggregatedSource = new AggregatedSource(getId(), getName());
+            Iterator<TodoFile> iter = getTodoFileIterator();
+            while (iter.hasNext()) {
+                TodoFile f = iter.next();
+                aggregatedSource.addSource(f);
+            }
+        }
+        return aggregatedSource;
+    }
+
     public int getFileCount() {
         return todoFileMap.size();
     }
@@ -317,4 +256,5 @@ public class Project implements DataSource {
             aggregatedDataPointList.add(dataPoint);
         }
     }
+    
 }

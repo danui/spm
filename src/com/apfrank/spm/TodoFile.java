@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.security.MessageDigest;
 
-public class TodoFile implements Comparable<TodoFile> {
+public class TodoFile implements Comparable<TodoFile>, DataSource {
 
     private Project project;
     private Path path;
@@ -34,13 +34,15 @@ public class TodoFile implements Comparable<TodoFile> {
     /**
      * @return Id generated from name.
      */
-    public String getId() throws Exception {
+    @Override // DataSource
+    public String getId() {
         if (id == null) {
             id = HashTool.getMd5(this.getName());
         }
         return id;
     }
     
+    @Override // DataSource
     public String getName() {
         return path.getLastName();
     }
@@ -53,12 +55,49 @@ public class TodoFile implements Comparable<TodoFile> {
         return path.getFile(project.getRepositoryDir());
     }
     
+    @Override // DataSource
     public Date getFirstDate() {
         return dataPointMap.firstKey();
     }
     
+    @Override // DataSource
     public Date getLastDate() {
         return dataPointMap.lastKey();
+    }
+
+    @Override // DataSource
+    public int getDoneCount(Date date) {
+        DataPoint dataPoint = getDataPointAtOrBefore(date);
+        if (dataPoint != null) {
+            return dataPoint.getCount("DONE");
+        }
+        return 0;
+    }
+    
+    @Override // DataSource
+    public int getTodoCount(Date date) {
+        DataPoint dataPoint = getDataPointAtOrBefore(date);
+        if (dataPoint != null) {
+            return dataPoint.getCount("TODO");
+        }
+        return 0;
+    }
+
+    @Override // DataSource
+    public int getTotalCount(Date date) {
+        DataPoint dataPoint = getDataPointAtOrBefore(date);
+        if (dataPoint != null) {
+            return dataPoint.getCount("DONE")
+                +  dataPoint.getCount("TODO");
+            // NOTE: This is different from dataPoint.getTotalCount() because
+            // the SymbolFilter may recognise more than just done and todo.
+        }
+        return 0;
+    }
+    
+    @Override // DataSource
+    public Iterator<Date> getDates() {
+        return dataPointMap.keySet().iterator();
     }
     
     public DataPoint getLastDataPoint() {

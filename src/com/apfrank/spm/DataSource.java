@@ -16,7 +16,7 @@ public interface DataSource {
     public Date getLastDate();
     
     /**
-     * Get an iterator over dates of distinct data points.
+     * Get an iterator over dates.
      *
      * @return Iterator.
      */

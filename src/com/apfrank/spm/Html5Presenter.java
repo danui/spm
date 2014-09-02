@@ -18,13 +18,106 @@ import com.apfrank.json.JsonString;
 import com.apfrank.json.JsonNumber;
 
 public class Html5Presenter implements Presenter {
+    
+    private class Entry {
+        private final long HOUR = 1000 * 60 * 60;
+        private final long DAY = 24 * HOUR;
+        private DataSource source;
+        public Entry(DataSource source) {
+            this.source = source;
+        }
+        public String getName() {
+            return source.getName();
+        }
+        public String getAnchorId() {
+            return "anchor" + source.getId();
+        }
+        public JsonObject getJsonObject(long baseTime) {
+            JsonObject entry = new JsonObject();
+            entry.put("id", new JsonString(source.getId()));
+            entry.put("name", new JsonString(source.getName()));
 
+            DateGenerator generator;
+            long t0, t1;
+            t0 = source.getFirstDate().getTime();
+            t1 = source.getLastDate().getTime();
+            if ((t1-t0) <= 2*DAY) {
+                generator = DateGenerator.createHourly(
+                    source.getFirstDate(),
+                    source.getLastDate());
+            } else {
+                generator = DateGenerator.createDaily(
+                    source.getFirstDate(),
+                    source.getLastDate(),
+                    8);
+            }
+            // TODO: todoPercents should really be named donePercents.
+            //       but spm.js expects 'todoPercents'
+            JsonArray todoCounts = new JsonArray();
+            JsonArray todoPercents = new JsonArray();
+            while (generator.hasNext()) {
+                Date d = generator.next();
+                int todo = source.getTodoCount(d);
+                int done = source.getDoneCount(d);
+                int total = source.getTotalCount(d);
+                double donePercent = (double)done / (double)total;
+                double day = (double)(d.getTime() - baseTime) / DAY;
+                todoCounts.append((new JsonArray())
+                                  .append(new JsonNumber(day))
+                                  .append(new JsonNumber(todo)));
+                todoPercents.append((new JsonArray())
+                                    .append(new JsonNumber(day))
+                                    .append(new JsonNumber(donePercent)));
+            }
+            entry.put("todoCounts", todoCounts);
+            entry.put("todoPercents", todoPercents);
+            entry.put("finalCount", finalCount());
+            entry.put("finalTotal", finalTotal());
+            entry.put("duration", duration());
+            return entry;
+        }
+        
+        private JsonNumber finalCount() {
+            return new JsonNumber(source.getTodoCount(source.getLastDate()));
+        }
+        
+        private JsonNumber finalTotal() {
+            return new JsonNumber(source.getTotalCount(source.getLastDate()));
+        }
+        
+        private JsonNumber duration() {
+            double t0 = source.getFirstDate().getTime();
+            double t1 = source.getLastDate().getTime();
+            if (0 < source.getTodoCount(source.getLastDate())) {
+                t1 = (new Date()).getTime();
+            }
+            double duration = (t1-t0) / DAY;
+            return new JsonNumber(duration);
+        }
+    }
+    
     private Project project;
     private PrintStream out;
+    
+    /**
+     * An entry for the whole project.
+     */
+    private Entry projectEntry;
+    
+    /**
+     * Entries from TodoFiles.
+     */
+    private LinkedList<Entry> todoEntries;
     
     public Html5Presenter(Project project) {
         this.project = project;
         this.out = System.out;
+        this.projectEntry = new Entry(project.getAggregatedSource());
+        this.todoEntries = new LinkedList<Entry>();
+        Iterator<TodoFile> todoIter = project.getTodoFileIterator();
+        while (todoIter.hasNext()) {
+            todoEntries.add(new Entry(todoIter.next()));
+        }
     }
 
     public void present() throws Exception {
@@ -100,11 +193,21 @@ public class Html5Presenter implements Presenter {
     private JsonObject buildSpmData() throws Exception {
         JsonObject spmData = new JsonObject();
         JsonArray entries = new JsonArray();
-        entries.append(buildAggregateEntry());
-        Iterator<TodoFile> iter = project.getTodoFileIterator();
-        while (iter.hasNext()) {
-            TodoFile todoFile = iter.next();
-            entries.append(buildTodoFileEntry(todoFile));
+        // TODO: When Entry is ready, swap the following calls.
+        if (false) {        
+            entries.append(buildAggregateEntry());
+            Iterator<TodoFile> iter = project.getTodoFileIterator();
+            while (iter.hasNext()) {
+                TodoFile todoFile = iter.next();
+                entries.append(buildTodoFileEntry(todoFile));
+            }
+        } else {
+            long baseTime = project.getBaseTime();
+            entries.append(projectEntry.getJsonObject(baseTime));
+            Iterator<Entry> iter = todoEntries.iterator();
+            while (iter.hasNext()) {
+                entries.append(iter.next().getJsonObject(baseTime));
+            }
         }
         spmData.put("entries", entries);
         spmData.put("projectName", project.getName());

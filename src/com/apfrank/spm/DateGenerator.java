@@ -1,5 +1,6 @@
 package com.apfrank.spm;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -8,6 +9,11 @@ import java.util.Iterator;
  */
 public class DateGenerator implements Iterator<Date> {
 
+    private static final long SECOND = 1000;
+    private static final long MINUTE = 60 * SECOND;
+    private static final long HOUR = 60 * MINUTE;
+    private static final long DAY = 24 * HOUR;
+    
     private Date nextDate;
     private long lastTime;
     private long interval;
@@ -21,10 +27,10 @@ public class DateGenerator implements Iterator<Date> {
         if (!(0 <= hourOfDay && hourOfDay <= 23)) {
             throw new RuntimeException("hourOfDay should be 0-23, it is " + hourOfDay);
         }
-        long interval = 1000 * 60 * 60 * 24;
+        long interval = DAY;
         Calendar cal = Calendar.getInstance();
         long offset = cal.get(Calendar.ZONE_OFFSET);
-        offset += hourOfDay * 1000 * 60 * 60;
+        offset += hourOfDay * HOUR;
         return new DateGenerator(first, last, interval, offset);
     }
     
@@ -32,7 +38,7 @@ public class DateGenerator implements Iterator<Date> {
      * Create a DateGenerator that samples every hour.
      */
     public static DateGenerator createHourly(Date first, Date last) {
-        return new DateGenerator(first, last, 1000*60*60, 0);
+        return new DateGenerator(first, last, HOUR, 0);
     }
     
     public DateGenerator(Date first, Date last, long interval, long offset) {
@@ -67,6 +73,11 @@ public class DateGenerator implements Iterator<Date> {
             nextDate = null;
         }
         return date;
+    }
+    
+    @Override
+    public void remove() {
+        throw new RuntimeException("Not implemented");
     }
     
     private long getNextTime(long currentTime) {

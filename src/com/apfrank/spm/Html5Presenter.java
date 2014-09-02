@@ -48,11 +48,15 @@ public class Html5Presenter implements Presenter {
             //       but spm.js expects 'todoPercents'
             JsonArray todoCounts = new JsonArray();
             JsonArray todoPercents = new JsonArray();
+            int finalTotal = getFinalTotal();
             while (generator.hasNext()) {
                 Date d = generator.next();
                 int todo = source.getTodoCount(d);
                 int done = source.getDoneCount(d);
                 int total = source.getTotalCount(d);
+                if (total < finalTotal) {
+                    total = finalTotal;
+                }
                 double donePercent = (double)done / (double)total;
                 double day = (double)(d.getTime() - baseTime) / DAY;
                 todoCounts.append((new JsonArray())

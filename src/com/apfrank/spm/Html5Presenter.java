@@ -26,17 +26,10 @@ public class Html5Presenter implements Presenter {
         public Entry(DataSource source) {
             this.source = source;
         }
-        public String getName() {
-            return source.getName();
-        }
-        public String getAnchorId() {
-            return "anchor" + source.getId();
+        public int getFinalTotal() {
+            return source.getTotalCount(source.getLastDate());
         }
         public JsonObject getJsonObject(long baseTime) {
-            JsonObject entry = new JsonObject();
-            entry.put("id", new JsonString(source.getId()));
-            entry.put("name", new JsonString(source.getName()));
-
             DateGenerator generator;
             long t0, t1;
             t0 = source.getFirstDate().getTime();
@@ -69,23 +62,35 @@ public class Html5Presenter implements Presenter {
                                     .append(new JsonNumber(day))
                                     .append(new JsonNumber(donePercent)));
             }
+
+            JsonObject entry = new JsonObject();
             entry.put("todoCounts", todoCounts);
             entry.put("todoPercents", todoPercents);
-            entry.put("finalCount", finalCount());
-            entry.put("finalTotal", finalTotal());
-            entry.put("duration", duration());
+            entry.put("id", jsonId());
+            entry.put("name", jsonName());
+            entry.put("finalCount", jsonFinalCount());
+            entry.put("finalTotal", jsonFinalTotal());
+            entry.put("duration", jsonDuration());
             return entry;
         }
         
-        private JsonNumber finalCount() {
+        private JsonString jsonId() {
+            return new JsonString(source.getId());
+        }
+        
+        private JsonString jsonName() {
+            return new JsonString(source.getName());
+        }
+        
+        private JsonNumber jsonFinalCount() {
             return new JsonNumber(source.getTodoCount(source.getLastDate()));
         }
         
-        private JsonNumber finalTotal() {
+        private JsonNumber jsonFinalTotal() {
             return new JsonNumber(source.getTotalCount(source.getLastDate()));
         }
         
-        private JsonNumber duration() {
+        private JsonNumber jsonDuration() {
             double t0 = source.getFirstDate().getTime();
             double t1 = source.getLastDate().getTime();
             if (0 < source.getTodoCount(source.getLastDate())) {
@@ -193,98 +198,15 @@ public class Html5Presenter implements Presenter {
     private JsonObject buildSpmData() throws Exception {
         JsonObject spmData = new JsonObject();
         JsonArray entries = new JsonArray();
-        // TODO: When Entry is ready, swap the following calls.
-        if (false) {        
-            entries.append(buildAggregateEntry());
-            Iterator<TodoFile> iter = project.getTodoFileIterator();
-            while (iter.hasNext()) {
-                TodoFile todoFile = iter.next();
-                entries.append(buildTodoFileEntry(todoFile));
-            }
-        } else {
-            long baseTime = project.getBaseTime();
-            entries.append(projectEntry.getJsonObject(baseTime));
-            Iterator<Entry> iter = todoEntries.iterator();
-            while (iter.hasNext()) {
-                entries.append(iter.next().getJsonObject(baseTime));
-            }
+        long baseTime = project.getBaseTime();
+        entries.append(projectEntry.getJsonObject(baseTime));
+        Iterator<Entry> iter = todoEntries.iterator();
+        while (iter.hasNext()) {
+            entries.append(iter.next().getJsonObject(baseTime));
         }
         spmData.put("entries", entries);
         spmData.put("projectName", project.getName());
         return spmData;
-    }
-    
-    private JsonValue buildTodoFileEntry(TodoFile todoFile) throws Exception {
-        return buildEntry(todoFile.getId(),
-                          todoFile.getName(),
-                          todoFile.getDataPointIterator());
-    }
-    
-    /**
-     * Builds a special entry based on aggregated data.
-     */
-    private JsonValue buildAggregateEntry() throws Exception {
-        return buildEntry(project.getId(),
-                          "Project",
-                          project.getAggregatedDataPointIterator());
-    }
-    
-    private JsonValue buildEntry(String id,
-                                 String name,
-                                 Iterator<DataPoint> iter)
-    {
-        JsonObject entry = new JsonObject();
-        entry.put("id", id);
-        entry.put("name", name);
-        JsonArray todoCounts = new JsonArray();
-        JsonArray todoPercents = new JsonArray();
-        DataPoint firstDataPoint = null;
-        DataPoint lastDataPoint = null;
-        while (iter.hasNext()) {
-            DataPoint point = iter.next();
-            if (firstDataPoint == null) {
-                firstDataPoint = point;
-            }
-            lastDataPoint = point;
-            
-            long time = point.getDate().getTime() - project.getBaseTime();
-            JsonNumber day = new JsonNumber(1.0 * time / 1000.0 / 60.0 / 60.0 / 24.0);
-            int count = point.getCount("TODO");
-            int total = point.getTotalCount();
-
-            JsonArray countPoint = new JsonArray()
-                .append(day)
-                .append(new JsonNumber(count));
-            JsonArray percentPoint = new JsonArray()
-                .append(day)
-                .append(new JsonNumber(1.0 * (total - count) / total));
-            
-            todoCounts.append(countPoint);
-            todoPercents.append(percentPoint);
-        }
-        entry.put("todoCounts", todoCounts);
-        entry.put("todoPercents", todoPercents);
-
-        int finalCount = 0;
-        int finalTotal = 0;
-        double duration = 0.0;
-        if (lastDataPoint != null) {
-            finalCount = lastDataPoint.getCount("TODO");
-            finalTotal = lastDataPoint.getTotalCount();
-            double t0, t1;
-            t0 = firstDataPoint.getDate().getTime();
-            if (finalCount > 0) {
-                t1 = new Date().getTime();
-            } else {
-                t1 = lastDataPoint.getDate().getTime();
-            }
-            duration = (t1-t0) / 1000 / 60 /60 / 24;
-        }
-        entry.put("finalCount", new JsonNumber(finalCount));
-        entry.put("finalTotal", new JsonNumber(finalTotal));
-        entry.put("duration", new JsonNumber(duration));
-
-        return entry;
     }
     
     private void presentCss(String path) throws Exception {

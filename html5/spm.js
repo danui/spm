@@ -112,7 +112,7 @@ $(document).ready(function () {
                 var k = entry.finalCount;
                 var n = entry.finalTotal;
                 var t = entry.duration;
-                var eta = t * n / (n-k);
+                var eta = t * k / (n-k);
                 if (entryStats.hasChildNodes()) {
                     entryStats.appendChild(document.createTextNode(", "));
                 }

@@ -42,11 +42,7 @@ public class Main {
             //Presenter presenter = new BasicPresenter(project);
             Presenter presenter = new Html5Presenter(project);
             presenter.present();
-            
-            System.err.println("FROG Checkout Count: " + project.getCheckoutCount());
-            // TODO: Implement Presenter
-            //Presenter presenter = new Presenter(project);
-            //presenter.present(System.out);
+
         } catch (UsageException e) {
             System.out.println(e.getMessage());
         } finally {

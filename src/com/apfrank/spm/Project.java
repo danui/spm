@@ -60,7 +60,6 @@ public class Project {
         projectName = projectPath.toString();
         todoFileMap = new TreeMap<String,TodoFile>();
         populateTodoFileMap(filenameFilter);
-        System.err.println("FROG: checkoutCount in Project: " + checkoutCount);
     }
     
     public int getCheckoutCount() {
@@ -198,8 +197,7 @@ public class Project {
             if (commit == null && currentCommitHash == null) {
                 // do nothing, already at latest commit.
             } else if (commit != null &&
-                       commit.getHash().equals(currentCommitHash))
-            {
+                       commit.getHash().equals(currentCommitHash)) {
                 // do nothing, already at request commit.
             } else if (commit == null) {
                 // Checkout latest.
@@ -208,14 +206,12 @@ public class Project {
                 co.call();
                 this.currentCommitHash = null;
                 this.checkoutCount += 1;
-                System.err.println("FROG checkout branch " + branch);
             } else {
                 // Checkout commit.
                 CheckoutCommand co = git.checkout();
                 co.setStartPoint(commit.getRevCommit());
                 co.setCreateBranch(false);
                 co.setForce(false);
-                System.err.println("FROG checkout commit " + commit.getHash());
                 co.setName(commit.getHash());
                 Ref ref = co.call();
                 this.currentCommitHash = commit.getHash();

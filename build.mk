@@ -20,6 +20,12 @@ clean:
 	rm -vf spm.jar
 	rm -rf out
 
+todo:
+	find src -name "*.java" -exec grep --color=always 'TODO[:]' \{\} \+
+
+frog:
+	find src -name "*.java" -exec grep --color=always 'FROG' \{\} \+
+
 doc: build
 	javadoc 			\
 		-d javadoc-out		\

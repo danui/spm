@@ -1,23 +1,7 @@
 default: build
 
-CLASS_FILES=						\
-	out/com/apfrank/spm/Main.class			\
-	out/com/apfrank/spm/BasicPresenter.class	\
-	out/com/apfrank/spm/Html5Presenter.class	\
-	out/com/apfrank/spm/Commit.class		\
-	out/com/apfrank/spm/CommitLog.class		\
-	out/com/apfrank/spm/DataPoint.class		\
-	out/com/apfrank/spm/FileTools.class		\
-	out/com/apfrank/spm/GitTools.class		\
-	out/com/apfrank/spm/Path.class			\
-	out/com/apfrank/spm/Presenter.class		\
-	out/com/apfrank/spm/Project.class		\
-	out/com/apfrank/spm/ScrumFilenameFilter.class	\
-	out/com/apfrank/spm/SymbolFilter.class		\
-	out/com/apfrank/spm/TodoFile.class		\
-	out/com/apfrank/spm/UsageException.class	\
-
-build: $(CLASS_FILES)
+build:
+	scons
 
 out/%.class: src/%.java
 	mkdir -p $(dir $@)

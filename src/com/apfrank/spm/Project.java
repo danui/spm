@@ -132,6 +132,21 @@ public class Project {
     }
     
     /**
+     * Get commits of a given path that are reachable from the project branch.
+     */
+    public Iterable<Commit> getCommits(Path path) throws Exception {
+        LinkedList<Commit> list = new LinkedList<Commit>();
+        LogCommand log = git.log();
+        log.add(git.getRepository().resolve("refs/remotes/origin/"+branch));
+        log.addPath(path.toString());
+        Iterator<RevCommit> iter = log.call().iterator();
+        while (iter.hasNext()) {
+            list.add(new Commit(iter.next()));
+        }
+        return list;
+    }
+    
+    /**
      * Build todoFileMap, which maps:
      *
      * <pre>

@@ -9,6 +9,7 @@ import java.util.Iterator;
 
 import org.eclipse.jgit.revwalk.RevCommit;
 
+// TODO: DELETE
 
 /**
  * An object for storing Commits ordered by time and by hash.

@@ -143,8 +143,4 @@ public class TodoFile implements Comparable<TodoFile>, DataSource {
         // issue because eventually they will merge.
         dataPointMap.put(dataPoint.getDate(), dataPoint);
     }
-    
-    public Iterator<DataPoint> getDataPointIteratorW() {
-        return dataPointMap.values().iterator();
-    }
 }

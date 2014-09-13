@@ -19,6 +19,28 @@ public class DateGenerator implements Iterator<Date> {
     private long interval;
     private long offset;
     
+    public static DateGenerator createNatural(Date first, Date last) {
+        long duration = last.getTime() - first.getTime();
+        long intervals[] = {1*HOUR, 2*HOUR, 4*HOUR, 8*HOUR, 12*HOUR,
+                            1*DAY, 2*DAY, 7*DAY};
+        int i = 0;
+        while (duration / intervals[i] > 48) {
+            if (i == intervals.length - 1) {
+                break;
+            }
+            i += 1;
+        }
+        long interval = intervals[i];
+        
+        if (interval >= 1*DAY) {
+            Calendar cal = Calendar.getInstance();
+            long offset = cal.get(Calendar.ZONE_OFFSET);
+            offset += 8 * HOUR;
+            return new DateGenerator(first, last, interval, offset);
+        }
+        return new DateGenerator(first, last, interval, 0); 
+    }
+    
     
     /**
      * Create a DateGenerator that samples daily at the specified hourOfDay.
@@ -40,7 +62,13 @@ public class DateGenerator implements Iterator<Date> {
     public static DateGenerator createHourly(Date first, Date last) {
         return new DateGenerator(first, last, HOUR, 0);
     }
-    
+
+    /**
+     * @param first First date.
+     * @param last Last date.
+     * @param interval Intervals in milliseconds.
+     * @param offset Offset alignment.
+     */
     public DateGenerator(Date first, Date last, long interval, long offset) {
         if (interval <= 0) {
             throw new RuntimeException("invalid interval: " + interval);

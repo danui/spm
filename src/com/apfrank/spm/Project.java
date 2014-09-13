@@ -39,11 +39,11 @@ public class Project {
     private SymbolFilter symbolFilter;
     
     /**
-     * Map filename -> TodoFile
+     * Map filename -> TodoFile. Use a map so files are ordered by path.
      */
-    private Map<String,TodoFile> todoFileMap;
+    private TreeMap<String,TodoFile> todoFileMap;
 
-    private CommitLog commitLog;
+    private CommitLog DELETE_commitLog;
     
     private LinkedList<DataPoint> aggregatedDataPointList;
     private AggregatedSource aggregatedSource;
@@ -61,12 +61,9 @@ public class Project {
         repositoryDir = GitTools.getRepositoryDir(git);
         projectDir = projectPath.getFile(repositoryDir);
         projectName = projectPath.toString();
-        buildTodoFileMap(filenameFilter);
-        buildCommitLog();
-        performCounting();
-        checkoutLatest();
+        todoFileMap = new TreeMap<String,TodoFile>();
+        populateTodoFileMap(filenameFilter);
         System.err.println("FROG: checkoutCount in Project: " + checkoutCount);
-        buildAggregatedDataPointList();
     }
     
     public int getCheckoutCount() {
@@ -117,14 +114,14 @@ public class Project {
      * Get time of the first commit.
      */
     public long getBaseTime() {
-        return commitLog.getFirstDate().getTime();
+        return getAggregatedSource().getFirstDate().getTime();
     }
     
     /**
      * Get an Iterator over the filenames accepted by the provided
      * FilenameFilter.
      */
-    public Iterator<String> getFilenameIterator() {
+    public Iterator<String> DELETE_getFilenameIterator() {
         return todoFileMap.keySet().iterator();
     }
 
@@ -135,7 +132,8 @@ public class Project {
     /**
      * @return Iterator over aggregated data points.
      */
-    public Iterator<DataPoint> getAggregatedDataPointIterator() {
+    // TODO: DELETE
+    public Iterator<DataPoint> DELETE_getAggregatedDataPointIterator() {
         return aggregatedDataPointList.iterator();
     }
     
@@ -165,10 +163,7 @@ public class Project {
      * String filename -> TodoFile
      * </pre>
      */
-    private void buildTodoFileMap(FilenameFilter filenameFilter) {
-        assert projectDir != null;
-        assert todoFileMap == null;
-        todoFileMap = new TreeMap<String,TodoFile>();
+    private void populateTodoFileMap(FilenameFilter filenameFilter) {
         SortedSet<String> set = FileTools.findFilenames(
             projectDir, filenameFilter);
         Iterator<String> iter = set.iterator();
@@ -177,42 +172,6 @@ public class Project {
             Path path = new Path(projectPath, filename);
             TodoFile todoFile = new TodoFile(this, path);
             todoFileMap.put(filename, todoFile);
-        }
-    }
-
-    private void buildCommitLog() throws Exception {
-        assert todoFileMap != null;
-        assert commitLog == null;
-        commitLog = new CommitLog();
-        Iterator<TodoFile> iter = getTodoFileIterator();
-        while (iter.hasNext()) {
-            addCommitsFromTodoFile(iter.next());
-        }
-    }
-    
-    private void addCommitsFromTodoFile(TodoFile todoFile) throws Exception {
-        LogCommand log = git.log();
-        log.add(git.getRepository().resolve(
-            "refs/remotes/origin/" + branch));
-        log.addPath(todoFile.getPath().toString());
-        Iterator<RevCommit> iter = log.call().iterator();
-        while (iter.hasNext()) {
-            RevCommit revCommit = iter.next();
-            Commit commit = commitLog.lookupCommit(revCommit);
-            DataPoint dataPoint = new DataPoint(
-                commit.getDate(),
-                todoFile.getPath()
-            );
-            commit.addDataPoint(dataPoint);
-            todoFile.addDataPoint(dataPoint);
-        }
-    }
-    
-    private void performCounting() throws Exception {
-        Iterator<Commit> iter = commitLog.getCommitIterator();
-        while (iter.hasNext()) {
-            Commit commit = iter.next();
-            performCountingOnCommit(commit);
         }
     }
     
@@ -282,76 +241,6 @@ public class Project {
             }
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
-        }
-    }
-    
-    private void performCountingOnCommit(Commit commit)
-        throws Exception
-    {
-        // git checkout commit.getHash();
-        CheckoutCommand co = git.checkout();
-        co.setStartPoint(commit.getRevCommit());
-        co.setCreateBranch(false);
-        co.setForce(false);
-        // This is an anomaly in Jgit. We have to name the commits
-        // we checkout headless is not allowed. So we just use the
-        // hash.
-        co.setName(commit.getHash());
-        Ref ref = co.call();
-        this.checkoutCount += 1;
-        // TODO: what's ref for?
-        Iterator<DataPoint> iter = commit.getDataPointIterator();
-        while (iter.hasNext()) {
-            DataPoint dataPoint = iter.next();
-            performCountingOnDataPoint(dataPoint);
-        }
-    }
-    
-    private void performCountingOnDataPoint(DataPoint dataPoint)
-        throws Exception
-    {
-        Path path = dataPoint.getPath();
-        File file = path.getFile(repositoryDir);
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        String line;
-        while (null != (line = reader.readLine())) {
-            String symbol = symbolFilter.getSymbol(line);
-            if (symbol != null) {
-                dataPoint.increment(symbol);
-            }
-        }
-    }
-    
-    private void checkoutLatest() throws Exception {
-        CheckoutCommand co = git.checkout();
-        co.setName(branch);
-        Ref ref = co.call();
-        this.checkoutCount += 1;
-   }
-    
-    private void buildAggregatedDataPointList() {
-        aggregatedDataPointList = new LinkedList<DataPoint>();
-        long lowerTime = commitLog.getFirstDate().getTime();
-        long upperTime = commitLog.getLastDate().getTime();
-        final long aDay = 1000 * 60 * 60 * 24;
-        for (long t = lowerTime; t <= upperTime; t += aDay) {
-            Date sampleDate = new Date(t);
-            DataPoint dataPoint = new DataPoint(sampleDate, projectPath);
-            Iterator<TodoFile> iter = getTodoFileIterator();
-            while (iter.hasNext()) {
-                TodoFile todoFile = iter.next();
-                DataPoint filePoint =
-                    todoFile.getDataPointAtOrBefore(sampleDate);
-                if (filePoint == null) {
-                    continue;
-                }
-                Iterator<String> symbolIter = filePoint.getSymbolIterator();
-                while (symbolIter.hasNext()) {
-                    String symbol = symbolIter.next();
-                    dataPoint.increment(symbol, filePoint.getCount(symbol));
-                }
-            }
-            aggregatedDataPointList.add(dataPoint);
         }
     }
     

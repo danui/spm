@@ -2,6 +2,7 @@ package com.apfrank.spm;
 
 import java.io.PrintStream;
 import java.util.Iterator;
+import java.util.Date;
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -39,15 +40,15 @@ public class BasicPresenter implements Presenter {
     }
     
     private void presentTodoFileCounts(TodoFile todoFile) {
-        Iterator<DataPoint> dpIter = todoFile.getDataPointIterator();
-        while (dpIter.hasNext()) {
-            DataPoint dataPoint = dpIter.next();
-            int todo = dataPoint.getCount("TODO");
-            int total = dataPoint.getTotalCount();
+        Iterator<Date> iter = DateGenerator.createNatural(
+            todoFile.getFirstDate(), todoFile.getLastDate());
+        while (iter.hasNext()) {
+            Date d = iter.next();
+            int todo = todoFile.getTodoCount(d);
+            int total = todoFile.getTotalCount(d);
             double percent = 100.0 * todo / total;
             out.format("  %s %8d %8d %6.2f%n",
-                       dataPoint.getDate(),
-                       todo, total, percent);
+                       d, todo, total, percent);
         }
     }
     

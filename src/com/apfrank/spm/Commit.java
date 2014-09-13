@@ -9,7 +9,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 /**
  * A small wrapper around RevCommit that associates it with DataPoints.
  */
-public class Commit {
+public class Commit implements Comparable<Commit> {
     private RevCommit revCommit;
     private String hash;
     private Date date;
@@ -20,6 +20,15 @@ public class Commit {
         this.hash = revCommit.getName();
         this.date = revCommit.getAuthorIdent().getWhen();
         this.dataMap = new TreeMap<Path,DataPoint>();
+    }
+    
+    @Override // Comparable
+    public int compareTo(Commit other) {
+        int ret = this.getDate().compareTo(other.getDate());
+        if (ret == 0) {
+            ret = this.getHash().compareTo(other.getHash());
+        }
+        return ret;
     }
 
     public RevCommit getRevCommit() {

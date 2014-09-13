@@ -30,6 +30,8 @@ public class Project {
     private String branch;
     private Path projectPath;
     private String projectName;
+    private int checkoutCount = 0;
+    private String currentCommitHash = null;
     
     private File repositoryDir;
     private File projectDir;
@@ -55,6 +57,7 @@ public class Project {
         this.branch = branch;
         this.projectPath = path;
         this.symbolFilter = symbolFilter;
+        this.checkoutCount = 0;
         repositoryDir = GitTools.getRepositoryDir(git);
         projectDir = projectPath.getFile(repositoryDir);
         projectName = projectPath.toString();
@@ -62,7 +65,12 @@ public class Project {
         buildCommitLog();
         performCounting();
         checkoutLatest();
+        System.err.println("FROG: checkoutCount in Project: " + checkoutCount);
         buildAggregatedDataPointList();
+    }
+    
+    public int getCheckoutCount() {
+        return checkoutCount;
     }
     
     public File getRepositoryDir() {
@@ -134,18 +142,22 @@ public class Project {
     /**
      * Get commits of a given path that are reachable from the project branch.
      */
-    public Iterable<Commit> getCommits(Path path) throws Exception {
-        LinkedList<Commit> list = new LinkedList<Commit>();
-        LogCommand log = git.log();
-        log.add(git.getRepository().resolve("refs/remotes/origin/"+branch));
-        log.addPath(path.toString());
-        Iterator<RevCommit> iter = log.call().iterator();
-        while (iter.hasNext()) {
-            list.add(new Commit(iter.next()));
+    public Iterable<Commit> getCommits(Path path) {
+        try {
+            LinkedList<Commit> list = new LinkedList<Commit>();
+            LogCommand log = git.log();
+            log.add(git.getRepository().resolve("refs/remotes/origin/"+branch));
+            log.addPath(path.toString());
+            Iterator<RevCommit> iter = log.call().iterator();
+            while (iter.hasNext()) {
+                list.add(new Commit(iter.next()));
+            }
+            return list;
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
-        return list;
     }
-    
+
     /**
      * Build todoFileMap, which maps:
      *
@@ -204,6 +216,75 @@ public class Project {
         }
     }
     
+    /**
+     * Create DataPoint for 'path' at 'commit'.
+     */
+    public DataPoint createDataPoint(Path path, Commit commit) {
+        try {
+            DataPoint dataPoint = new DataPoint(commit.getDate(), path);
+            BufferedReader reader = new BufferedReader(openPathAtCommit(path, commit));
+            String line;
+            while (null != (line = reader.readLine())) {
+                String symbol = symbolFilter.getSymbol(line);
+                if (symbol != null) {
+                    dataPoint.increment(symbol);
+                }
+            }
+            return dataPoint;
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+    
+    /**
+     * Open a FileReader for path at commit.  If commit is null, then
+     * open path at the latest commit.
+     */
+    public FileReader openPathAtCommit(Path path, Commit commit) {
+        try {
+            checkoutCommit(commit);
+            File file = path.getFile(repositoryDir);
+            return new FileReader(file);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+    
+    /**
+     * @param commit Commit to checkout. If null, checkout latest.
+     */
+    public void checkoutCommit(Commit commit) {
+        try {
+            if (commit == null && currentCommitHash == null) {
+                // do nothing, already at latest commit.
+            } else if (commit != null &&
+                       commit.getHash().equals(currentCommitHash))
+            {
+                // do nothing, already at request commit.
+            } else if (commit == null) {
+                // Checkout latest.
+                CheckoutCommand co = git.checkout();
+                co.setName(branch);
+                co.call();
+                this.currentCommitHash = null;
+                this.checkoutCount += 1;
+            } else {
+                // Checkout commit.
+                CheckoutCommand co = git.checkout();
+                co.setStartPoint(commit.getRevCommit());
+                co.setCreateBranch(false);
+                co.setForce(false);
+                System.err.println("FROG checkout commit " + commit.getHash());
+                co.setName(commit.getHash());
+                Ref ref = co.call();
+                this.currentCommitHash = commit.getHash();
+                this.checkoutCount += 1;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+    
     private void performCountingOnCommit(Commit commit)
         throws Exception
     {
@@ -217,6 +298,7 @@ public class Project {
         // hash.
         co.setName(commit.getHash());
         Ref ref = co.call();
+        this.checkoutCount += 1;
         // TODO: what's ref for?
         Iterator<DataPoint> iter = commit.getDataPointIterator();
         while (iter.hasNext()) {
@@ -244,7 +326,8 @@ public class Project {
         CheckoutCommand co = git.checkout();
         co.setName(branch);
         Ref ref = co.call();
-    }
+        this.checkoutCount += 1;
+   }
     
     private void buildAggregatedDataPointList() {
         aggregatedDataPointList = new LinkedList<DataPoint>();

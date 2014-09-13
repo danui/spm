@@ -11,16 +11,28 @@ public class TodoFile implements Comparable<TodoFile>, DataSource {
 
     private Project project;
     private Path path;
-    private TreeMap<Date,DataPoint> dataPointMap;
     private String id;
+    private TreeMap<Date,Commit> commits;
+    private TreeMap<Commit,DataPoint> points;
+
+    private TreeMap<Date,DataPoint> dataPointMap;
+
     
     public TodoFile(Project project, Path path) {
         this.project = project;
         this.path = path;
-        this.dataPointMap = new TreeMap<Date,DataPoint>();
-        this.id = null;
+        // TODO: delete dataPointMap.
+        dataPointMap = new TreeMap<Date,DataPoint>();
+        id = HashTool.getMd5(path.toString());
+        commits = new TreeMap<Date,Commit>();
+        Iterator<Commit> iter = project.getCommits(path).iterator();
+        while (iter.hasNext()) {
+            Commit i = iter.next();
+            commits.put(i.getDate(), i);
+        }
+        points = new TreeMap<Commit,DataPoint>();
     }
-
+        
     @Override
     public int compareTo(TodoFile other) {
         return this.getPath().compareTo(other.getPath());
@@ -31,14 +43,8 @@ public class TodoFile implements Comparable<TodoFile>, DataSource {
         return path.toString();
     }
     
-    /**
-     * @return Id generated from name.
-     */
     @Override // DataSource
     public String getId() {
-        if (id == null) {
-            id = HashTool.getMd5(this.getName());
-        }
         return id;
     }
     
@@ -57,12 +63,12 @@ public class TodoFile implements Comparable<TodoFile>, DataSource {
     
     @Override // DataSource
     public Date getFirstDate() {
-        return dataPointMap.firstKey();
+        return commits.firstKey();
     }
     
     @Override // DataSource
     public Date getLastDate() {
-        return dataPointMap.lastKey();
+        return commits.lastKey();
     }
 
     @Override // DataSource
@@ -97,21 +103,39 @@ public class TodoFile implements Comparable<TodoFile>, DataSource {
     
     @Override // DataSource
     public Iterator<Date> getDates() {
-        return dataPointMap.keySet().iterator();
+        return commits.keySet().iterator();
+    }
+    
+    public Commit getLastCommit() {
+        if (commits.isEmpty()) {
+            return null;
+        }
+        return commits.lastEntry().getValue();
+    }
+    
+    public DataPoint getDataPoint(Commit commit) {
+        if (points.containsKey(commit)) {
+            return points.get(commit);
+        } else {
+            DataPoint p = project.createDataPoint(path, commit);
+            points.put(commit, p);
+            return p;
+        }
     }
     
     public DataPoint getLastDataPoint() {
-        return dataPointMap.get(getLastDate());
+        return getDataPoint(getLastCommit());
     }
     
     public DataPoint getDataPointAtOrBefore(Date date) {
-        Map.Entry<Date,DataPoint> entry = dataPointMap.floorEntry(date);
-        if (entry == null) {
+        Map.Entry<Date,Commit> e = commits.floorEntry(date);
+        if (e == null) {
             return null;
         }
-        return entry.getValue();
+        return getDataPoint(e.getValue());
     }
-    
+
+    // TODO: DELETE
     public void addDataPoint(DataPoint dataPoint) {
         // NOTE: If two datapoints have the same date, then the latest
         // dataPoint to be added will replace the other. This is possible
@@ -120,7 +144,7 @@ public class TodoFile implements Comparable<TodoFile>, DataSource {
         dataPointMap.put(dataPoint.getDate(), dataPoint);
     }
     
-    public Iterator<DataPoint> getDataPointIterator() {
+    public Iterator<DataPoint> getDataPointIteratorW() {
         return dataPointMap.values().iterator();
     }
 }

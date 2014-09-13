@@ -184,7 +184,8 @@ public class Html5Presenter implements Presenter {
         while (iter.hasNext()) {
             TodoFile todoFile = iter.next();
             out.format("<pre id=\"%s\">", getTextId(todoFile));
-            presentFile(todoFile.getFile());
+            presentBufferedReader(new BufferedReader(
+                project.openPathAtCommit(todoFile.getPath(), null)));
             out.format("</pre>");
         }
     }

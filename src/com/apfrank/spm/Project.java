@@ -43,9 +43,6 @@ public class Project {
      */
     private TreeMap<String,TodoFile> todoFileMap;
 
-    private CommitLog DELETE_commitLog;
-    
-    private LinkedList<DataPoint> aggregatedDataPointList;
     private AggregatedSource aggregatedSource;
     
     public Project(Git git, String branch, Path path,
@@ -117,24 +114,8 @@ public class Project {
         return getAggregatedSource().getFirstDate().getTime();
     }
     
-    /**
-     * Get an Iterator over the filenames accepted by the provided
-     * FilenameFilter.
-     */
-    public Iterator<String> DELETE_getFilenameIterator() {
-        return todoFileMap.keySet().iterator();
-    }
-
     public Iterator<TodoFile> getTodoFileIterator() {
         return todoFileMap.values().iterator();
-    }
-    
-    /**
-     * @return Iterator over aggregated data points.
-     */
-    // TODO: DELETE
-    public Iterator<DataPoint> DELETE_getAggregatedDataPointIterator() {
-        return aggregatedDataPointList.iterator();
     }
     
     /**
@@ -227,6 +208,7 @@ public class Project {
                 co.call();
                 this.currentCommitHash = null;
                 this.checkoutCount += 1;
+                System.err.println("FROG checkout branch " + branch);
             } else {
                 // Checkout commit.
                 CheckoutCommand co = git.checkout();

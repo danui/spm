@@ -7,16 +7,6 @@ $(document).ready(function () {
             $("#myBrand").html(spm.projectName);
         }
     }
-
-    
-    /*
-    <div id="stories" class="padtop">
-        <h1>stories (finalCount) 12 days</h1>
-        <div id="stories-chart" class="chartarea"></div>
-        <pre id="stories-text">
-        </pre>
-    </div>
-    */
     
     function insertDropdownMenu(targetId, targetName) {
         var myDropdownMenu = document.getElementById("myDropdownMenu");
@@ -87,7 +77,7 @@ $(document).ready(function () {
         (function () {
             var msg;
             var n = entry.finalTotal;
-            var k = n - entry.finalCount;
+            var k = n - entry.finalTodoCount;
             if (n > 0) {
                 var p = 100.0 * k / n;
                 p = p.toFixed(0);
@@ -104,12 +94,12 @@ $(document).ready(function () {
             entryStats.appendChild(createKeyValue("Duration", humanDays(entry.duration)));
         }());
         if (entry.finalTotal > 0 &&
-            entry.finalTotal > entry.finalCount &&
-            entry.finalCount > 0 &&
+            entry.finalTotal > entry.finalTodoCount &&
+            entry.finalTodoCount > 0 &&
             entry.duration > 0)
         {
             (function () {
-                var k = entry.finalCount;
+                var k = entry.finalTodoCount;
                 var n = entry.finalTotal;
                 var t = entry.duration;
                 var eta = t * k / (n-k);
@@ -137,7 +127,7 @@ $(document).ready(function () {
         }
         myContents.appendChild(content);
         
-        var plot = $.jqplot(chartId,  [ entry.todoPercents, entry.todoCounts ], {
+        var plot = $.jqplot(chartId,  [ entry.donePercents, entry.todoCounts ], {
             axes: {
                 yaxis: { min: 0, numberTicks: 11 },
                 y2axis: { min: 0, max: 1, numberTicks: 11}
@@ -157,8 +147,8 @@ $(document).ready(function () {
         });
 
         var dropDownName = entry.name;
-        if (entry.finalCount > 0) {
-            dropDownName += " (" + entry.finalCount + ")";
+        if (entry.finalTodoCount > 0) {
+            dropDownName += " (" + entry.finalTodoCount + ")";
         }
         insertDropdownMenu(entry.id, dropDownName);
     }

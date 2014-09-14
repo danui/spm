@@ -44,10 +44,8 @@ public class Html5Presenter implements Presenter {
                     source.getLastDate(),
                     8);
             }
-            // TODO: todoPercents should really be named donePercents.
-            //       but spm.js expects 'todoPercents'
             JsonArray todoCounts = new JsonArray();
-            JsonArray todoPercents = new JsonArray();
+            JsonArray donePercents = new JsonArray();
             int finalTotal = getFinalTotal();
             while (generator.hasNext()) {
                 Date d = generator.next();
@@ -62,17 +60,17 @@ public class Html5Presenter implements Presenter {
                 todoCounts.append((new JsonArray())
                                   .append(new JsonNumber(day))
                                   .append(new JsonNumber(todo)));
-                todoPercents.append((new JsonArray())
+                donePercents.append((new JsonArray())
                                     .append(new JsonNumber(day))
                                     .append(new JsonNumber(donePercent)));
             }
 
             JsonObject entry = new JsonObject();
             entry.put("todoCounts", todoCounts);
-            entry.put("todoPercents", todoPercents);
+            entry.put("donePercents", donePercents);
             entry.put("id", jsonId());
             entry.put("name", jsonName());
-            entry.put("finalCount", jsonFinalCount());
+            entry.put("finalTodoCount", jsonFinalTodoCount());
             entry.put("finalTotal", jsonFinalTotal());
             entry.put("duration", jsonDuration());
             return entry;
@@ -86,7 +84,7 @@ public class Html5Presenter implements Presenter {
             return new JsonString(source.getName());
         }
         
-        private JsonNumber jsonFinalCount() {
+        private JsonNumber jsonFinalTodoCount() {
             return new JsonNumber(source.getTodoCount(source.getLastDate()));
         }
         
